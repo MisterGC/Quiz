@@ -2,105 +2,105 @@
 
 var rounds = [
     {
-        name: "90s Games Trivia",
-        tagline: "How well do you REALLY remember the golden age?",
-        sponsor: "Brought to you by Bonzi Buddy™ — Your Desktop Pal!",
+        name: "90er-Spiele-Wissen",
+        tagline: "Wie gut erinnerst du dich WIRKLICH an die goldene Ära?",
+        sponsor: "Präsentiert von Bonzi Buddy™ — Dein Desktop-Kumpel!",
         mode: "standard",
         questions: [
             {
-                text: "In 'GoldenEye 007' for N64, which multiplayer character was famously too short to hit?",
+                text: "Welcher Multiplayer-Charakter war in 'GoldenEye 007' für N64 berühmt dafür, zu klein zum Treffen zu sein?",
                 answers: ["Jaws", "Oddjob", "Baron Samedi", "Natalya"],
                 correct: 1,
-                roast: "Even Oddjob is disappointed in you."
+                roast: "Selbst Oddjob ist enttäuscht von dir."
             },
             {
-                text: "What was the cheat code for 'The Sims' to get unlimited money?",
+                text: "Wie lautete der Cheatcode bei 'Die Sims', um unbegrenzt Geld zu bekommen?",
                 answers: ["motherlode", "rosebud", "kaching", "hesoyam"],
                 correct: 1,
-                roast: "Your bank account: also a simulation."
+                roast: "Dein Kontostand: auch nur eine Simulation."
             },
             {
-                text: "Which 90s game featured a protagonist named 'Guybrush Threepwood'?",
+                text: "In welchem 90er-Spiel hieß der Protagonist 'Guybrush Threepwood'?",
                 answers: ["Day of the Tentacle", "Sam & Max Hit the Road",
                           "The Secret of Monkey Island", "Full Throttle"],
                 correct: 2,
-                roast: "You fight like a dairy farmer."
+                roast: "Du kämpfst wie ein Bauer."
             },
             {
-                text: "In 'Doom' (1993), what is the name of the first episode?",
+                text: "Wie heißt die erste Episode von 'Doom' (1993)?",
                 answers: ["The Shores of Hell", "Inferno",
                           "Knee-Deep in the Dead", "Thy Flesh Consumed"],
                 correct: 2,
-                roast: "Knee-deep in wrong answers, more like."
+                roast: "Knietief in falschen Antworten, sozusagen."
             },
             {
-                text: "What bird-based artillery game launched in 1995 and became a LAN party staple?",
+                text: "Welches Artillerie-Spiel mit Viechern erschien 1995 und wurde zum LAN-Party-Klassiker?",
                 answers: ["Angry Birds", "Worms", "Liero", "Scorched Earth"],
                 correct: 1,
-                roast: "Those aren't birds, genius. They're invertebrates."
+                roast: "Das sind keine Vögel, Genie. Das sind Wirbellose."
             }
         ]
     },
     {
-        name: "Insult Swordfighting",
-        tagline: "You fight like a cow.",
-        sponsor: "Sponsored by Stan's Previously Owned Vessels — No Refunds!",
+        name: "Beleidigungsfechten",
+        tagline: "Du kämpfst wie eine Kuh.",
+        sponsor: "Gesponsert von Stans Gebrauchtschiff-Handel — Keine Rückgabe!",
         mode: "insult",
         questions: [
             {
-                text: "\"You fight like a dairy farmer!\"",
+                text: "\"Du kämpfst wie ein Bauer!\"",
                 answers: [
-                    "How appropriate. You fight like a cow.",
-                    "I'm rubber, you're glue.",
-                    "No, YOU fight like a dairy farmer!",
-                    "I once owned a dairy farm."
+                    "Wie passend. Du kämpfst wie eine Kuh.",
+                    "Ich bin Gummi, du bist Leim.",
+                    "Nein, DU kämpfst wie ein Bauer!",
+                    "Ich hatte mal einen Bauernhof."
                 ],
                 correct: 0,
-                roast: "Even the dairy farmer is shaking his head."
+                roast: "Selbst der Bauer schüttelt den Kopf."
             },
             {
-                text: "\"Soon you'll be wearing my sword like a shish kebab!\"",
+                text: "\"Bald wirst du mein Schwert wie einen Schaschlikspieß tragen!\"",
                 answers: [
-                    "I'm not hungry right now.",
-                    "First you'd better stop waving it like a feather duster.",
-                    "That sounds delicious actually.",
-                    "My sword is bigger than yours."
+                    "Ich hab gerade keinen Hunger.",
+                    "Erst solltest du aufhören, damit herumzufuchteln wie mit einem Staubwedel.",
+                    "Klingt eigentlich lecker.",
+                    "Mein Schwert ist größer als deins."
                 ],
                 correct: 1,
-                roast: "You couldn't dust a shelf, let alone fence."
+                roast: "Du könntest nicht mal ein Regal abstauben, geschweige denn fechten."
             },
             {
-                text: "\"People fall at my feet when they see me coming!\"",
+                text: "\"Die Leute fallen vor mir auf die Knie, wenn sie mich kommen sehen!\"",
                 answers: [
-                    "I'm not surprised, you smell terrible.",
-                    "Even BEFORE they smell your ugly breath?",
-                    "That must be very impressive.",
-                    "I fall at nobody's feet!"
+                    "Das wundert mich nicht, du stinkst fürchterlich.",
+                    "Sogar BEVOR sie deinen Atem riechen?",
+                    "Das muss sehr beeindruckend sein.",
+                    "Ich falle vor niemandem auf die Knie!"
                 ],
                 correct: 1,
-                roast: "Your breath could sink a ship from 50 paces."
+                roast: "Dein Atem könnte ein Schiff aus 50 Schritten versenken."
             },
             {
-                text: "\"I've got a long, sharp lesson for you to learn today!\"",
+                text: "\"Ich hab heute eine lange, scharfe Lektion für dich!\"",
                 answers: [
-                    "I already know more than you'll ever forget.",
-                    "And I've got a little TIP for you — get the POINT?",
-                    "I'm a fast learner.",
-                    "Lessons are for school!"
+                    "Ich weiß jetzt schon mehr, als du je vergessen wirst.",
+                    "Und ich hab einen kleinen TIPP für dich — kapier die POINTE!",
+                    "Ich lerne schnell.",
+                    "Lektionen sind was für die Schule!"
                 ],
                 correct: 1,
-                roast: "The only point you'll ever get is the one on your head."
+                roast: "Die einzige Pointe, die du je kriegst, ist die auf deinem Kopf."
             }
         ]
     },
     {
-        name: "Retro PC Survival",
-        tagline: "Back when 640K was enough for everybody.",
-        sponsor: "Powered by Turbo Pascal™ — Compile Your Dreams!",
+        name: "Retro-PC-Überlebenskampf",
+        tagline: "Damals, als 640K für jeden reichten.",
+        sponsor: "Powered by Turbo Pascal™ — Kompiliere deine Träume!",
         mode: "standard",
         questions: [
             {
-                text: "What did you type in DOS to free up conventional memory before running a game?",
+                text: "Was hast du in DOS eingegeben, um konventionellen Speicher freizumachen, bevor du ein Spiel starten konntest?",
                 answers: [
                     "MEMFREE.EXE",
                     "HIMEM.SYS + EMM386.EXE in CONFIG.SYS",
@@ -108,35 +108,35 @@ var rounds = [
                     "DELTREE /Y C:\\WINDOWS"
                 ],
                 correct: 1,
-                roast: "You probably also deleted COMMAND.COM once."
+                roast: "Du hast bestimmt auch mal COMMAND.COM gelöscht."
             },
             {
-                text: "What was the IRQ number you typically set for a Sound Blaster card?",
+                text: "Welche IRQ-Nummer hat man typischerweise für eine Sound Blaster Karte eingestellt?",
                 answers: ["IRQ 3", "IRQ 5", "IRQ 9", "IRQ 15"],
                 correct: 1,
-                roast: "No sound for you. Just like your love life."
+                roast: "Kein Sound für dich. Wie dein Liebesleben."
             },
             {
-                text: "Which storage medium held a whopping 1.44 MB?",
+                text: "Welches Speichermedium fasste satte 1,44 MB?",
                 answers: [
                     "ZIP Disk",
-                    "3.5\" Floppy Disk",
+                    "3,5\"-Diskette",
                     "Compact Disc",
                     "Jaz Drive"
                 ],
                 correct: 1,
-                roast: "1.44 MB — still more data than your dating profile."
+                roast: "1,44 MB — immer noch mehr Daten als dein Dating-Profil."
             },
             {
-                text: "What did 'Abort, Retry, Fail?' mean in DOS?",
+                text: "Was bedeutete 'Abort, Retry, Fail?' in DOS?",
                 answers: [
-                    "Your game saved successfully",
-                    "A critical disk read/write error occurred",
-                    "Windows was about to install",
-                    "You needed to insert the next floppy disk"
+                    "Dein Spiel wurde erfolgreich gespeichert",
+                    "Ein kritischer Lese-/Schreibfehler ist aufgetreten",
+                    "Windows war kurz davor, sich zu installieren",
+                    "Du musstest die nächste Diskette einlegen"
                 ],
                 correct: 1,
-                roast: "Abort, Retry, Fail — also the story of your haircuts."
+                roast: "Abort, Retry, Fail — auch die Geschichte deiner Frisuren."
             }
         ]
     }

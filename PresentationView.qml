@@ -41,14 +41,14 @@ Item {
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "~ A Retro Quiz Show ~"
+                text: "~ Eine Retro Quizshow ~"
                 color: root.gold
                 font { pixelSize: 20; italic: true; family: "monospace" }
             }
             Item { width: 1; height: 30 }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "Waiting for the moderator to start ..."
+                text: "Warte auf den Moderator ..."
                 color: "#88ffffff"
                 font { pixelSize: 16; family: "monospace" }
 
@@ -121,7 +121,7 @@ Item {
             id: roundNumText
             anchors.horizontalCenter: parent.horizontalCenter
             y: parent.height * 0.32
-            text: "ROUND " + (root.game.currentRound + 1)
+            text: "RUNDE " + (root.game.currentRound + 1)
             color: root.gold
             font { pixelSize: 38; bold: true; family: "monospace" }
             scale: 3.0
@@ -287,7 +287,7 @@ Item {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: questionScreen.isInsult
-                text: "⚔ INSULT DUEL ⚔"
+                text: "⚔ BELEIDIGUNGSDUELL ⚔"
                 color: root.gold
                 font { pixelSize: 22; bold: true; family: "monospace" }
             }
@@ -295,7 +295,7 @@ Item {
             // Question number
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "Question " + (root.game.currentQuestion + 1) + " of "
+                text: "Frage " + (root.game.currentQuestion + 1) + " von "
                       + (root.game.currentRoundData ? root.game.currentRoundData.questions.length : 0)
                 color: "#888888"
                 font { pixelSize: 14; family: "monospace" }
@@ -453,7 +453,7 @@ Item {
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "ROUND COMPLETE"
+                text: "RUNDE ABGESCHLOSSEN"
                 color: root.gold
                 font { pixelSize: 28; bold: true; family: "monospace" }
             }
@@ -472,7 +472,7 @@ Item {
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "POINTS"
+                text: "PUNKTE"
                 color: "#888888"
                 font { pixelSize: 18; family: "monospace" }
             }
@@ -495,13 +495,13 @@ Item {
         property string rating: {
             var s = root.game.score;
             var maxScore = root.game.maxScore;
-            if (maxScore <= 0) return "Participation Trophy";
+            if (maxScore <= 0) return "Trostpreis";
             var pct = s / maxScore;
-            if (pct >= 0.9) return "RETRO GOD";
-            if (pct >= 0.7) return "Pixel Veteran";
-            if (pct >= 0.5) return "Casual Gamer";
-            if (pct >= 0.3) return "Button Masher";
-            return "Noob Detected";
+            if (pct >= 0.9) return "RETRO GOTT";
+            if (pct >= 0.7) return "Pixel-Veteran";
+            if (pct >= 0.5) return "Gelegenheitsspieler";
+            if (pct >= 0.3) return "Knöpfchendrücker";
+            return "Noob erkannt";
         }
 
         Column {
@@ -510,7 +510,7 @@ Item {
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "FINAL RESULTS"
+                text: "ENDERGEBNIS"
                 color: root.gold
                 font { pixelSize: 36; bold: true; family: "monospace" }
             }
@@ -523,7 +523,7 @@ Item {
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "POINTS"
+                text: "PUNKTE"
                 color: "#888888"
                 font { pixelSize: 20; family: "monospace" }
             }

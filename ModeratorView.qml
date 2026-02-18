@@ -46,7 +46,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Game is ready"
+                    text: "Spiel ist bereit"
                     color: "#cccccc"
                     font { pixelSize: 14; family: "monospace" }
                 }
@@ -57,7 +57,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Start Game"
+                        text: "Spiel starten"
                         color: "#ffffff"
                         font { pixelSize: 16; bold: true; family: "monospace" }
                     }
@@ -77,7 +77,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Round " + (root.game.currentRound + 1)
+                    text: "Runde " + (root.game.currentRound + 1)
                     color: root.gold
                     font { pixelSize: 16; bold: true; family: "monospace" }
                 }
@@ -90,7 +90,7 @@ Item {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: (root.game.currentRoundData
-                           ? root.game.currentRoundData.questions.length : 0) + " questions"
+                           ? root.game.currentRoundData.questions.length : 0) + " Fragen"
                     color: "#888888"
                     font { pixelSize: 12; family: "monospace" }
                 }
@@ -101,7 +101,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Start Round"
+                        text: "Runde starten"
                         color: "#ffffff"
                         font { pixelSize: 16; bold: true; family: "monospace" }
                     }
@@ -122,8 +122,8 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Q" + (root.game.currentQuestion + 1)
-                          + " — Correct answer:"
+                    text: "F" + (root.game.currentQuestion + 1)
+                          + " — Richtige Antwort:"
                     color: "#888888"
                     font { pixelSize: 12; family: "monospace" }
                 }
@@ -166,7 +166,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Show Answers"
+                        text: "Antworten zeigen"
                         color: "#ffffff"
                         font { pixelSize: 16; bold: true; family: "monospace" }
                     }
@@ -185,7 +185,7 @@ Item {
 
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: root.game.answerLocked ? "Player answered" : "Waiting for answer ..."
+                        text: root.game.answerLocked ? "Spieler hat geantwortet" : "Warte auf Antwort ..."
                         color: root.game.answerLocked ? root.gold : "#666666"
                         font { pixelSize: 12; family: "monospace" }
                     }
@@ -205,7 +205,7 @@ Item {
 
                         Text {
                             anchors.centerIn: parent
-                            text: "Reveal Answer"
+                            text: "Antwort aufdecken"
                             color: "#ffffff"
                             font { pixelSize: 16; bold: true; family: "monospace" }
                         }
@@ -231,7 +231,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: root.game.lastCorrect ? "CORRECT!" : "WRONG!"
+                        text: root.game.lastCorrect ? "RICHTIG!" : "FALSCH!"
                         color: "#ffffff"
                         font { pixelSize: 16; bold: true; family: "monospace" }
                     }
@@ -239,13 +239,13 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "+" + root.game.lastPointsEarned + " pts"
+                    text: "+" + root.game.lastPointsEarned + " Pkt."
                     color: root.gold
                     font { pixelSize: 14; family: "monospace" }
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Score: " + root.game.score
+                    text: "Punkte: " + root.game.score
                     color: "#cccccc"
                     font { pixelSize: 12; family: "monospace" }
                 }
@@ -257,7 +257,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Next"
+                        text: "Weiter"
                         color: "#ffffff"
                         font { pixelSize: 16; bold: true; family: "monospace" }
                     }
@@ -277,13 +277,13 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Round complete"
+                    text: "Runde abgeschlossen"
                     color: "#cccccc"
                     font { pixelSize: 14; family: "monospace" }
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Score: " + root.game.score
+                    text: "Punkte: " + root.game.score
                     color: root.gold
                     font { pixelSize: 16; bold: true; family: "monospace" }
                 }
@@ -296,7 +296,7 @@ Item {
                     Text {
                         anchors.centerIn: parent
                         text: root.game.currentRound + 1 < root.game.totalRounds
-                              ? "Next Round" : "Final Results"
+                              ? "Nächste Runde" : "Endergebnis"
                         color: "#ffffff"
                         font { pixelSize: 16; bold: true; family: "monospace" }
                     }
@@ -316,7 +316,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Game Over"
+                    text: "Spiel vorbei"
                     color: "#cccccc"
                     font { pixelSize: 14; family: "monospace" }
                 }
@@ -328,7 +328,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Restart"
+                        text: "Neustart"
                         color: "#ffffff"
                         font { pixelSize: 16; bold: true; family: "monospace" }
                     }

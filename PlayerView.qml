@@ -30,7 +30,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.leftMargin: 12
-                text: "PLAYER"
+                text: "SPIELER"
                 color: root.gold
                 font { pixelSize: 14; bold: true; family: "monospace" }
             }
@@ -38,7 +38,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
                 anchors.rightMargin: 12
-                text: "Score: " + root.game.score
+                text: "Punkte: " + root.game.score
                 color: "#cccccc"
                 font { pixelSize: 13; family: "monospace" }
             }
@@ -60,9 +60,9 @@ Item {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: {
-                        if (root.game.phase === "title") return "Waiting for game ...";
-                        if (root.game.phase === "roundIntro") return "Get ready!";
-                        return "Waiting for next round ...";
+                        if (root.game.phase === "title") return "Warte auf Spiel ...";
+                        if (root.game.phase === "roundIntro") return "Mach dich bereit!";
+                        return "Warte auf nächste Runde ...";
                     }
                     color: "#888888"
                     font { pixelSize: 14; family: "monospace" }
@@ -202,14 +202,14 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: root.game.lastCorrect ? "CORRECT!" : "WRONG!"
+                        text: root.game.lastCorrect ? "RICHTIG!" : "FALSCH!"
                         color: "#ffffff"
                         font { pixelSize: 16; bold: true; family: "monospace" }
                     }
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "+" + root.game.lastPointsEarned + " pts"
+                    text: "+" + root.game.lastPointsEarned + " Pkt."
                     color: root.gold
                     font { pixelSize: 18; bold: true; family: "monospace" }
                 }
@@ -228,7 +228,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "GAME OVER"
+                    text: "SPIEL VORBEI"
                     color: root.gold
                     font { pixelSize: 18; bold: true; family: "monospace" }
                 }
