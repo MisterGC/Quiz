@@ -1,0 +1,5 @@
+module quiz
+PresentationView 1.0 PresentationView.qml
+ModeratorView 1.0 ModeratorView.qml
+PlayerView 1.0 PlayerView.qml
+SoundTodo 1.0 SoundTodo.qml
