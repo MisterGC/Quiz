@@ -183,10 +183,13 @@ Item {
                     spacing: 8
                     visible: root.game.answersRevealed
 
+                    // Both players' status
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: root.game.answerLocked ? "Spieler hat geantwortet" : "Warte auf Antwort ..."
-                        color: root.game.answerLocked ? root.gold : "#666666"
+                        text: "S1: " + (root.game.player1Locked ? "✓" : "...")
+                              + "  S2: " + (root.game.player2Locked ? "✓" : "...")
+                        color: (root.game.player1Locked && root.game.player2Locked)
+                               ? root.gold : "#666666"
                         font { pixelSize: 12; family: "monospace" }
                     }
 
@@ -221,31 +224,34 @@ Item {
             // --- Reveal phase ---
             Column {
                 anchors.centerIn: parent
-                spacing: 12
+                spacing: 8
                 visible: root.game.phase === "reveal"
 
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: 140; height: 36; radius: 6
-                    color: root.game.lastCorrect ? "#00e676" : "#ff1744"
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: root.game.lastCorrect ? "RICHTIG!" : "FALSCH!"
-                        color: "#ffffff"
-                        font { pixelSize: 16; bold: true; family: "monospace" }
-                    }
-                }
-
+                // Player 1 result
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "+" + root.game.lastPointsEarned + " Pkt."
-                    color: root.gold
-                    font { pixelSize: 14; family: "monospace" }
+                    text: "S1: " + (root.game.player1Correct ? "RICHTIG!" : "FALSCH!")
+                          + (root.game.player1PointsEarned > 0
+                             ? " +" + root.game.player1PointsEarned + " Pkt." : "")
+                    color: root.game.player1Correct ? "#00e676" : "#ff1744"
+                    font { pixelSize: 12; bold: true; family: "monospace" }
                 }
+
+                // Player 2 result
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Punkte: " + root.game.score
+                    text: "S2: " + (root.game.player2Correct ? "RICHTIG!" : "FALSCH!")
+                          + (root.game.player2PointsEarned > 0
+                             ? " +" + root.game.player2PointsEarned + " Pkt." : "")
+                    color: root.game.player2Correct ? "#00e676" : "#ff1744"
+                    font { pixelSize: 12; bold: true; family: "monospace" }
+                }
+
+                // Scores
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "S1: " + root.game.player1Score
+                          + "  S2: " + root.game.player2Score
                     color: "#cccccc"
                     font { pixelSize: 12; family: "monospace" }
                 }
@@ -283,9 +289,10 @@ Item {
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Punkte: " + root.game.score
+                    text: "S1: " + root.game.player1Score
+                          + "  S2: " + root.game.player2Score
                     color: root.gold
-                    font { pixelSize: 16; bold: true; family: "monospace" }
+                    font { pixelSize: 14; bold: true; family: "monospace" }
                 }
 
                 Rectangle {

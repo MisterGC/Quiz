@@ -79,7 +79,6 @@ Item {
 
         onVisibleChanged: {
             if (visible) {
-                // Reset animation state
                 revealedTagline = "";
                 taglineCharIdx = 0;
                 roundNumText.scale = 3.0;
@@ -94,29 +93,22 @@ Item {
             }
         }
 
-        // Top decorative line
         Rectangle {
             id: topLine
             anchors.horizontalCenter: parent.horizontalCenter
             y: parent.height * 0.28
-            height: 2
-            width: 0
-            color: root.gold
-            opacity: 0.6
+            height: 2; width: 0
+            color: root.gold; opacity: 0.6
         }
 
-        // Bottom decorative line
         Rectangle {
             id: bottomLine
             anchors.horizontalCenter: parent.horizontalCenter
             y: parent.height * 0.72
-            height: 2
-            width: 0
-            color: root.gold
-            opacity: 0.6
+            height: 2; width: 0
+            color: root.gold; opacity: 0.6
         }
 
-        // "ROUND X" — zoom in with overshoot
         Text {
             id: roundNumText
             anchors.horizontalCenter: parent.horizontalCenter
@@ -124,12 +116,10 @@ Item {
             text: "RUNDE " + (root.game.currentRound + 1)
             color: root.gold
             font { pixelSize: 38; bold: true; family: "monospace" }
-            scale: 3.0
-            opacity: 0
+            scale: 3.0; opacity: 0
             transformOrigin: Item.Center
         }
 
-        // Round name — slides in from right
         Text {
             id: roundNameText
             anchors.horizontalCenter: parent.horizontalCenter
@@ -140,7 +130,6 @@ Item {
             opacity: 0
         }
 
-        // Tagline — typewriter reveal
         Text {
             id: taglineText
             anchors.horizontalCenter: parent.horizontalCenter
@@ -150,7 +139,6 @@ Item {
             font { pixelSize: 18; italic: true; family: "monospace" }
         }
 
-        // Blinking cursor during typewriter
         Text {
             visible: taglineTimer.running
             anchors.left: taglineText.right
@@ -165,7 +153,6 @@ Item {
             }
         }
 
-        // Sponsor text — fades in last
         Text {
             id: sponsorText
             anchors.horizontalCenter: parent.horizontalCenter
@@ -177,11 +164,9 @@ Item {
             opacity: 0
         }
 
-        // Typewriter timer
         Timer {
             id: taglineTimer
-            interval: 30
-            repeat: true
+            interval: 30; repeat: true
             onTriggered: {
                 var full = root.game.currentRoundData ? root.game.currentRoundData.tagline : "";
                 if (roundIntroScreen.taglineCharIdx < full.length) {
@@ -194,7 +179,6 @@ Item {
             }
         }
 
-        // Sponsor fade-in after typewriter completes
         ParallelAnimation {
             id: sponsorFadeIn
             NumberAnimation {
@@ -207,11 +191,9 @@ Item {
             }
         }
 
-        // Master animation sequence
         SequentialAnimation {
             id: introSequence
 
-            // 1. Decorative lines expand from center
             ParallelAnimation {
                 NumberAnimation {
                     target: topLine; property: "width"
@@ -227,7 +209,6 @@ Item {
 
             PauseAnimation { duration: 100 }
 
-            // 2. "ROUND X" zooms in with overshoot
             ParallelAnimation {
                 NumberAnimation {
                     target: roundNumText; property: "scale"
@@ -241,7 +222,6 @@ Item {
 
             PauseAnimation { duration: 300 }
 
-            // 3. Round name slides in from right
             ParallelAnimation {
                 NumberAnimation {
                     target: roundNameText; property: "anchors.horizontalCenterOffset"
@@ -255,7 +235,6 @@ Item {
 
             PauseAnimation { duration: 400 }
 
-            // 4. Start typewriter for tagline
             ScriptAction { script: taglineTimer.start() }
         }
 
@@ -278,163 +257,222 @@ Item {
                                 ? root.game.currentRoundData.mode === "insult" : false
         property bool isReveal: root.game.phase === "reveal"
 
+        // Background question number (large, faint)
+        Text {
+            anchors.centerIn: parent
+            text: (root.game.currentQuestion + 1).toString()
+            color: "#ffffff"
+            opacity: 0.06
+            font { pixelSize: 280; bold: true; family: "monospace" }
+        }
+
+        // Countdown number (upper-left, rotated)
+        Text {
+            x: 20; y: 15
+            rotation: -8
+            text: {
+                var s = Math.ceil(root.game.timerValue / 10);
+                return s < 10 ? "0" + s : s.toString();
+            }
+            visible: root.game.phase === "question"
+            opacity: root.game.timerRunning ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 400 } }
+            color: {
+                var secs = root.game.timerValue / 10.0;
+                if (secs > 7) return root.colCorrect;
+                if (secs > 3) return root.gold;
+                return root.colWrong;
+            }
+            Behavior on color { ColorAnimation { duration: 500 } }
+            font { pixelSize: 48; bold: true; family: "monospace" }
+        }
+
+        // Insult round header
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 8
+            visible: questionScreen.isInsult && root.game.answersRevealed
+            text: "⚔ BELEIDIGUNGSDUELL ⚔"
+            color: root.gold
+            font { pixelSize: 18; bold: true; family: "monospace" }
+        }
+
+        // Question text — animates between centered (big) and top (small)
+        Text {
+            id: questionText
+            width: parent.width - 60
+            anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment: Text.AlignHCenter
+            text: questionScreen.qData ? questionScreen.qData.text : ""
+            color: "#ffffff"
+            wrapMode: Text.WordWrap
+            font {
+                pixelSize: questionScreen.isInsult ? 30 : 28
+                bold: true
+                italic: questionScreen.isInsult
+                family: "monospace"
+            }
+
+            // Animate position and scale based on answersRevealed
+            y: (root.game.answersRevealed || questionScreen.isReveal)
+               ? 30 : parent.height * 0.3
+            scale: (root.game.answersRevealed || questionScreen.isReveal)
+                   ? 0.6 : 1.0
+            transformOrigin: Item.Top
+
+            Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
+            Behavior on scale { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
+        }
+
+        // Vertical answer list
         Column {
-            anchors.fill: parent
-            anchors.margins: 30
+            id: answerList
+            anchors.left: parent.left
+            anchors.leftMargin: 50
+            anchors.right: parent.right
+            anchors.rightMargin: 50
+            y: parent.height * 0.35
+            spacing: 14
+            opacity: (root.game.answersRevealed || questionScreen.isReveal) ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 300 } }
+
+            Repeater {
+                model: questionScreen.qData ? questionScreen.qData.answers : []
+
+                Item {
+                    width: answerList.width
+                    height: answerLetterText.height + 8
+
+                    readonly property bool isCorrect: questionScreen.qData
+                                                      && index === questionScreen.qData.correct
+                    readonly property bool isChosen1: index === root.game.player1Answer
+                    readonly property bool isChosen2: index === root.game.player2Answer
+                    readonly property color letterColor: [root.colA, root.colB,
+                                                          root.colC, root.colD][index]
+                    readonly property string prefix: questionScreen.isInsult
+                                                     ? ["1", "2", "3", "4"][index]
+                                                     : ["A", "B", "C", "D"][index]
+
+                    // Letter badge
+                    Text {
+                        id: answerLetterText
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: parent.prefix
+                        color: {
+                            if (!questionScreen.isReveal) return parent.letterColor;
+                            if (parent.isCorrect) return root.colCorrect;
+                            if ((parent.isChosen1 || parent.isChosen2) && !parent.isCorrect)
+                                return root.colWrong;
+                            return "#444444";
+                        }
+                        font { pixelSize: 24; bold: true; family: "monospace" }
+                        Behavior on color { ColorAnimation { duration: 300 } }
+                    }
+
+                    // Answer text
+                    Text {
+                        anchors.left: answerLetterText.right
+                        anchors.leftMargin: 14
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: modelData
+                        color: {
+                            if (!questionScreen.isReveal) return "#ffffff";
+                            if (parent.isCorrect) return root.colCorrect;
+                            if ((parent.isChosen1 || parent.isChosen2) && !parent.isCorrect)
+                                return root.colWrong;
+                            return "#555555";
+                        }
+                        font {
+                            pixelSize: 20
+                            bold: questionScreen.isReveal && parent.isCorrect
+                            family: "monospace"
+                            italic: questionScreen.isInsult
+                        }
+                        wrapMode: Text.WordWrap
+                        Behavior on color { ColorAnimation { duration: 300 } }
+                    }
+                }
+            }
+        }
+
+        // Roast text (on reveal)
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: scoreBar.top
+            anchors.bottomMargin: 20
+            visible: questionScreen.isReveal && root.game.lastRoast !== ""
+            text: root.game.lastRoast
+            color: root.gold
+            font { pixelSize: 20; italic: true; family: "monospace" }
+        }
+
+        // Score bar at bottom
+        Row {
+            id: scoreBar
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 16
             spacing: 20
 
-            // Insult round header
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: questionScreen.isInsult
-                text: "⚔ BELEIDIGUNGSDUELL ⚔"
-                color: root.gold
-                font { pixelSize: 22; bold: true; family: "monospace" }
-            }
+            // Player 1 score
+            Rectangle {
+                width: 160; height: 50; radius: 6
+                color: root.colA
 
-            // Question number
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "Frage " + (root.game.currentQuestion + 1) + " von "
-                      + (root.game.currentRoundData ? root.game.currentRoundData.questions.length : 0)
-                color: "#888888"
-                font { pixelSize: 14; family: "monospace" }
-            }
+                Column {
+                    anchors.centerIn: parent
+                    spacing: 2
 
-            // Question text
-            Text {
-                width: parent.width
-                horizontalAlignment: Text.AlignHCenter
-                text: questionScreen.qData ? questionScreen.qData.text : ""
-                color: "#ffffff"
-                font {
-                    pixelSize: questionScreen.isInsult ? 30 : 28
-                    bold: true
-                    italic: questionScreen.isInsult
-                    family: "monospace"
-                }
-                wrapMode: Text.WordWrap
-            }
-
-            Item { width: 1; height: 10 }
-
-            // Answer grid 2x2
-            Grid {
-                id: answerGrid
-                anchors.horizontalCenter: parent.horizontalCenter
-                columns: 2
-                spacing: 12
-                width: Math.min(parent.width, 700)
-
-                Repeater {
-                    model: questionScreen.qData ? questionScreen.qData.answers : []
-
-                    Rectangle {
-                        id: answerCard
-                        width: (answerGrid.width - answerGrid.spacing) / 2
-                        height: 70
-                        radius: 8
-                        opacity: root.game.answersRevealed || questionScreen.isReveal ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 300 } }
-
-                        readonly property bool isCorrect: questionScreen.qData
-                                                          && index === questionScreen.qData.correct
-                        readonly property bool isChosen: index === root.game.playerAnswer
-                        readonly property color baseColor: [root.colA, root.colB,
-                                                            root.colC, root.colD][index]
-                        readonly property string prefix: questionScreen.isInsult
-                                                         ? ["1.", "2.", "3.", "4."][index]
-                                                         : ["A", "B", "C", "D"][index]
-
-                        color: {
-                            if (!questionScreen.isReveal) return baseColor;
-                            if (isCorrect) return root.colCorrect;
-                            if (isChosen && !isCorrect) return root.colWrong;
-                            return Qt.darker(baseColor, 2.0);
-                        }
-                        border.color: isChosen && !questionScreen.isReveal ? root.gold : "transparent"
-                        border.width: isChosen && !questionScreen.isReveal ? 3 : 0
-
-                        Behavior on color { ColorAnimation { duration: 300 } }
-
-                        Row {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            spacing: 10
-
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: answerCard.prefix
-                                color: "#ffffff"
-                                font { pixelSize: 22; bold: true; family: "monospace" }
-                            }
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: parent.width - 40
-                                text: modelData
-                                color: "#ffffff"
-                                font {
-                                    pixelSize: 16
-                                    family: "monospace"
-                                    italic: questionScreen.isInsult
-                                }
-                                wrapMode: Text.WordWrap
-                            }
-                        }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "SPIELER 1"
+                        color: "#aaaacc"
+                        font { pixelSize: 10; family: "monospace" }
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: root.game.player1Score.toString()
+                        color: "#ffffff"
+                        font { pixelSize: 22; bold: true; family: "monospace" }
                     }
                 }
             }
 
-            // Timer bar — fades in when timer starts, fades out when it stops
-            Item {
-                width: Math.min(parent.width, 700)
-                height: 12
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: root.game.phase === "question"
-                opacity: root.game.timerRunning ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 400 } }
+            // Player 2 score
+            Rectangle {
+                width: 160; height: 50; radius: 6
+                color: root.colD
 
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 6
-                    color: "#333333"
-                }
-                Rectangle {
-                    width: parent.width * (root.game.timerMax > 0
-                           ? root.game.timerValue / root.game.timerMax : 0)
-                    height: parent.height
-                    radius: 6
-                    color: {
-                        var ratio = root.game.timerMax > 0
-                                    ? root.game.timerValue / root.game.timerMax : 0;
-                        if (ratio > 0.5) return root.colCorrect;
-                        if (ratio > 0.25) return "#ffcc00";
-                        return root.colWrong;
+                Column {
+                    anchors.centerIn: parent
+                    spacing: 2
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "SPIELER 2"
+                        color: "#ccaaaa"
+                        font { pixelSize: 10; family: "monospace" }
                     }
-                    Behavior on width { NumberAnimation { duration: 100 } }
-                    Behavior on color { ColorAnimation { duration: 500 } }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: root.game.player2Score.toString()
+                        color: "#ffffff"
+                        font { pixelSize: 22; bold: true; family: "monospace" }
+                    }
                 }
-            }
-
-            // Roast text (on reveal)
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: questionScreen.isReveal && root.game.lastRoast !== ""
-                text: root.game.lastRoast
-                color: root.gold
-                font { pixelSize: 20; italic: true; family: "monospace" }
             }
         }
 
         SoundTodo {
             label: "Question sting / Tension loop"
-            anchors { bottom: parent.bottom; left: parent.left; margins: 8 }
+            anchors { bottom: scoreBar.top; left: parent.left; margins: 8 }
             visible: root.game.phase === "question"
         }
         SoundTodo {
-            label: questionScreen.isReveal && root.game.lastCorrect
+            label: questionScreen.isReveal && root.game.player1Correct
                    ? "Correct fanfare" : "Wrong shame jingle"
-            anchors { bottom: parent.bottom; left: parent.left; margins: 8 }
+            anchors { bottom: scoreBar.top; left: parent.left; margins: 8 }
             visible: root.game.phase === "reveal"
         }
     }
@@ -464,12 +502,45 @@ Item {
                 font { pixelSize: 20; family: "monospace" }
             }
             Item { width: 1; height: 20 }
-            Text {
+
+            // Both scores
+            Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: root.game.score.toString()
-                color: "#ffffff"
-                font { pixelSize: 96; bold: true; family: "monospace" }
+                spacing: 40
+
+                Column {
+                    spacing: 4
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "SPIELER 1"
+                        color: "#aaaacc"
+                        font { pixelSize: 14; family: "monospace" }
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: root.game.player1Score.toString()
+                        color: "#ffffff"
+                        font { pixelSize: 72; bold: true; family: "monospace" }
+                    }
+                }
+
+                Column {
+                    spacing: 4
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "SPIELER 2"
+                        color: "#ccaaaa"
+                        font { pixelSize: 14; family: "monospace" }
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: root.game.player2Score.toString()
+                        color: "#ffffff"
+                        font { pixelSize: 72; bold: true; family: "monospace" }
+                    }
+                }
             }
+
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "PUNKTE"
@@ -492,11 +563,17 @@ Item {
         opacity: visible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 400 } }
 
+        property int totalScore: root.game.player1Score + root.game.player2Score
+        property string winner: {
+            if (root.game.player1Score > root.game.player2Score) return "SPIELER 1 GEWINNT!";
+            if (root.game.player2Score > root.game.player1Score) return "SPIELER 2 GEWINNT!";
+            return "UNENTSCHIEDEN!";
+        }
         property string rating: {
-            var s = root.game.score;
             var maxScore = root.game.maxScore;
             if (maxScore <= 0) return "Trostpreis";
-            var pct = s / maxScore;
+            var best = Math.max(root.game.player1Score, root.game.player2Score);
+            var pct = best / maxScore;
             if (pct >= 0.9) return "RETRO GOTT";
             if (pct >= 0.7) return "Pixel-Veteran";
             if (pct >= 0.5) return "Gelegenheitsspieler";
@@ -515,30 +592,57 @@ Item {
                 font { pixelSize: 36; bold: true; family: "monospace" }
             }
             Item { width: 1; height: 10 }
+
+            // Both scores side by side
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 40
+
+                Column {
+                    spacing: 4
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "SPIELER 1"
+                        color: "#aaaacc"
+                        font { pixelSize: 14; family: "monospace" }
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: root.game.player1Score.toString()
+                        color: "#ffffff"
+                        font { pixelSize: 96; bold: true; family: "monospace" }
+                    }
+                }
+
+                Column {
+                    spacing: 4
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "SPIELER 2"
+                        color: "#ccaaaa"
+                        font { pixelSize: 14; family: "monospace" }
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: root.game.player2Score.toString()
+                        color: "#ffffff"
+                        font { pixelSize: 96; bold: true; family: "monospace" }
+                    }
+                }
+            }
+
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: root.game.score.toString()
-                color: "#ffffff"
-                font { pixelSize: 112; bold: true; family: "monospace" }
+                text: finaleScreen.winner
+                color: root.gold
+                font { pixelSize: 28; bold: true; family: "monospace" }
             }
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "PUNKTE"
-                color: "#888888"
-                font { pixelSize: 20; family: "monospace" }
-            }
-            Item { width: 1; height: 20 }
+            Item { width: 1; height: 10 }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: finaleScreen.rating
                 color: root.gold
-                font { pixelSize: 32; bold: true; family: "monospace" }
-            }
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: root.game.score + " / " + root.game.maxScore
-                color: "#666666"
-                font { pixelSize: 16; family: "monospace" }
+                font { pixelSize: 24; bold: true; family: "monospace" }
             }
         }
 

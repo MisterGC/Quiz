@@ -4,10 +4,19 @@ Item {
     id: root
 
     required property QtObject game
+    required property int playerIndex
 
     readonly property color gold: "#ffcc00"
     readonly property color panelBg: "#1a1a2e"
     readonly property var answerColors: ["#2a4a8a", "#8a5a2a", "#2a7a3a", "#8a2a3a"]
+    readonly property color headerColor: playerIndex === 0 ? "#1a2a3e" : "#2a1a2e"
+
+    // Per-player state accessors
+    readonly property int myAnswer: playerIndex === 0 ? game.player1Answer : game.player2Answer
+    readonly property bool myLocked: playerIndex === 0 ? game.player1Locked : game.player2Locked
+    readonly property int myScore: playerIndex === 0 ? game.player1Score : game.player2Score
+    readonly property bool myCorrect: playerIndex === 0 ? game.player1Correct : game.player2Correct
+    readonly property int myPoints: playerIndex === 0 ? game.player1PointsEarned : game.player2PointsEarned
 
     clip: true
 
@@ -24,23 +33,23 @@ Item {
         Rectangle {
             width: parent.width
             height: 36
-            color: "#1a2a3e"
+            color: root.headerColor
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
-                anchors.leftMargin: 12
-                text: "SPIELER"
+                anchors.leftMargin: 8
+                text: "SPIELER " + (root.playerIndex + 1)
                 color: root.gold
-                font { pixelSize: 14; bold: true; family: "monospace" }
+                font { pixelSize: 12; bold: true; family: "monospace" }
             }
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
-                anchors.rightMargin: 12
-                text: "Punkte: " + root.game.score
+                anchors.rightMargin: 8
+                text: root.myScore.toString()
                 color: "#cccccc"
-                font { pixelSize: 13; family: "monospace" }
+                font { pixelSize: 12; family: "monospace" }
             }
         }
 
@@ -50,199 +59,122 @@ Item {
             height: parent.height - 36
 
             // --- Waiting (title / roundIntro / scoreboard) ---
-            Column {
+            Text {
                 anchors.centerIn: parent
-                spacing: 10
                 visible: root.game.phase === "title"
                          || root.game.phase === "roundIntro"
                          || root.game.phase === "scoreboard"
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: {
-                        if (root.game.phase === "title") return "Warte auf Spiel ...";
-                        if (root.game.phase === "roundIntro") return "Mach dich bereit!";
-                        return "Warte auf nächste Runde ...";
-                    }
-                    color: "#888888"
-                    font { pixelSize: 14; family: "monospace" }
+                text: {
+                    if (root.game.phase === "title") return "...";
+                    if (root.game.phase === "roundIntro") return "Bereit!";
+                    return "...";
                 }
-
-                SoundTodo {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    label: "Ambient lobby loop"
-                    visible: root.game.phase === "title"
-                }
+                color: "#888888"
+                font { pixelSize: 12; family: "monospace" }
             }
 
-            // --- Question phase ---
-            Column {
+            // --- Question phase: A/B/C/D buttons only ---
+            Grid {
+                id: buttonGrid
                 anchors.fill: parent
-                anchors.margins: 8
-                spacing: 8
+                anchors.margins: 6
+                columns: 2
+                spacing: 4
                 visible: root.game.phase === "question"
 
-                // Timer bar — fades in when timer starts, fades out when it stops
-                Item {
-                    width: parent.width
-                    height: 8
-                    opacity: root.game.timerRunning ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 400 } }
+                Repeater {
+                    model: root.game.answersRevealed ? 4 : 0
 
                     Rectangle {
-                        anchors.fill: parent
-                        radius: 4; color: "#333333"
-                    }
-                    Rectangle {
-                        width: parent.width * (root.game.timerMax > 0
-                               ? root.game.timerValue / root.game.timerMax : 0)
-                        height: parent.height
-                        radius: 4
+                        width: (buttonGrid.width - buttonGrid.spacing) / 2
+                        height: (buttonGrid.height - buttonGrid.spacing) / 2
+                        radius: 6
+                        opacity: root.game.answersRevealed ? 1 : 0
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+
+                        readonly property bool isInsult: root.game.currentRoundData
+                                                         && root.game.currentRoundData.mode === "insult"
+                        readonly property string label: isInsult
+                                                        ? ["1", "2", "3", "4"][index]
+                                                        : ["A", "B", "C", "D"][index]
+
                         color: {
-                            var ratio = root.game.timerMax > 0
-                                        ? root.game.timerValue / root.game.timerMax : 0;
-                            if (ratio > 0.5) return "#00e676";
-                            if (ratio > 0.25) return "#ffcc00";
-                            return "#ff1744";
+                            if (root.myLocked && root.myAnswer === index)
+                                return Qt.lighter(root.answerColors[index], 1.3);
+                            if (root.myLocked)
+                                return Qt.darker(root.answerColors[index], 1.5);
+                            return root.answerColors[index];
                         }
-                        Behavior on width { NumberAnimation { duration: 100 } }
-                        Behavior on color { ColorAnimation { duration: 500 } }
-                    }
-                }
+                        border.color: root.myLocked && root.myAnswer === index
+                                      ? root.gold : "transparent"
+                        border.width: root.myLocked && root.myAnswer === index
+                                      ? 2 : 0
 
-                // Answer buttons 2x2
-                Grid {
-                    id: buttonGrid
-                    width: parent.width
-                    columns: 2
-                    spacing: 6
+                        Behavior on color { ColorAnimation { duration: 200 } }
 
-                    Repeater {
-                        model: root.game.currentQuestionData
-                               ? root.game.currentQuestionData.answers : []
+                        Text {
+                            anchors.centerIn: parent
+                            text: parent.label
+                            color: "#ffffff"
+                            font { pixelSize: 24; bold: true; family: "monospace" }
+                        }
 
-                        Rectangle {
-                            id: btn
-                            width: (buttonGrid.width - buttonGrid.spacing) / 2
-                            height: (buttonGrid.parent.height - buttonGrid.y
-                                     - buttonGrid.spacing - 30) / 2
-                            radius: 6
-                            opacity: root.game.answersRevealed ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: 200 } }
-                            color: {
-                                if (root.game.answerLocked && root.game.playerAnswer === index)
-                                    return Qt.lighter(root.answerColors[index], 1.3);
-                                if (root.game.answerLocked)
-                                    return Qt.darker(root.answerColors[index], 1.5);
-                                return root.answerColors[index];
-                            }
-                            border.color: root.game.answerLocked && root.game.playerAnswer === index
-                                          ? root.gold : "transparent"
-                            border.width: root.game.answerLocked && root.game.playerAnswer === index
-                                          ? 2 : 0
-
-                            Behavior on color { ColorAnimation { duration: 200 } }
-
-                            readonly property bool isInsult: root.game.currentRoundData
-                                                             && root.game.currentRoundData.mode === "insult"
-                            readonly property string prefix: isInsult
-                                                             ? ["1", "2", "3", "4"][index]
-                                                             : ["A", "B", "C", "D"][index]
-
-                            Column {
-                                anchors.fill: parent
-                                anchors.margins: 8
-                                spacing: 2
-
-                                Text {
-                                    text: btn.prefix
-                                    color: "#ffffff"
-                                    font { pixelSize: 18; bold: true; family: "monospace" }
-                                }
-                                Text {
-                                    width: parent.width
-                                    text: modelData
-                                    color: "#ffffff"
-                                    font { pixelSize: 11; family: "monospace" }
-                                    wrapMode: Text.WordWrap
-                                    elide: Text.ElideRight
-                                    maximumLineCount: 3
-                                }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: root.game.answerLocked
-                                             ? Qt.ArrowCursor : Qt.PointingHandCursor
-                                onClicked: {
-                                    if (!root.game.answerLocked)
-                                        root.game.submitAnswer(index);
-                                }
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: root.myLocked
+                                         ? Qt.ArrowCursor : Qt.PointingHandCursor
+                            onClicked: {
+                                if (!root.myLocked)
+                                    root.game.submitAnswer(root.playerIndex, index);
                             }
                         }
                     }
-                }
-
-                SoundTodo {
-                    label: "Lock-in beep"
-                    visible: root.game.answerLocked
                 }
             }
 
             // --- Reveal phase ---
             Column {
                 anchors.centerIn: parent
-                spacing: 12
+                spacing: 8
                 visible: root.game.phase === "reveal"
 
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: 120; height: 32; radius: 6
-                    color: root.game.lastCorrect ? "#00e676" : "#ff1744"
+                    width: 100; height: 28; radius: 6
+                    color: root.myCorrect ? "#00e676" : "#ff1744"
 
                     Text {
                         anchors.centerIn: parent
-                        text: root.game.lastCorrect ? "RICHTIG!" : "FALSCH!"
+                        text: root.myCorrect ? "RICHTIG!" : "FALSCH!"
                         color: "#ffffff"
-                        font { pixelSize: 16; bold: true; family: "monospace" }
+                        font { pixelSize: 14; bold: true; family: "monospace" }
                     }
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "+" + root.game.lastPointsEarned + " Pkt."
+                    text: "+" + root.myPoints + " Pkt."
                     color: root.gold
-                    font { pixelSize: 18; bold: true; family: "monospace" }
-                }
-
-                SoundTodo {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    label: root.game.lastCorrect ? "Correct sound" : "Wrong sound"
+                    font { pixelSize: 16; bold: true; family: "monospace" }
                 }
             }
 
             // --- Finale phase ---
             Column {
                 anchors.centerIn: parent
-                spacing: 10
+                spacing: 6
                 visible: root.game.phase === "finale"
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "SPIEL VORBEI"
                     color: root.gold
-                    font { pixelSize: 18; bold: true; family: "monospace" }
+                    font { pixelSize: 14; bold: true; family: "monospace" }
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.game.score.toString()
+                    text: root.myScore.toString()
                     color: "#ffffff"
-                    font { pixelSize: 48; bold: true; family: "monospace" }
-                }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.game.score + " / " + root.game.maxScore
-                    color: "#888888"
-                    font { pixelSize: 12; family: "monospace" }
+                    font { pixelSize: 36; bold: true; family: "monospace" }
                 }
             }
         }

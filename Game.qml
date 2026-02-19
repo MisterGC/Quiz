@@ -13,16 +13,24 @@ Item {
     property string phase: "title" // title|roundIntro|question|reveal|scoreboard|finale
     property int currentRound: 0
     property int currentQuestion: 0
-    property int playerAnswer: -1
-    property bool answerLocked: false
-    property int score: 0
+    property bool answersRevealed: false
     property int timerValue: 0   // in tenths of a second
     property int timerMax: 150   // 15.0 seconds
     property bool timerRunning: false
-    property bool answersRevealed: false
     property string lastRoast: ""
-    property bool lastCorrect: false
-    property int lastPointsEarned: 0
+
+    // --- Per-player state ---
+    property int player1Answer: -1
+    property bool player1Locked: false
+    property int player1Score: 0
+    property bool player1Correct: false
+    property int player1PointsEarned: 0
+
+    property int player2Answer: -1
+    property bool player2Locked: false
+    property int player2Score: 0
+    property bool player2Correct: false
+    property int player2PointsEarned: 0
 
     // --- Derived ---
     readonly property int totalRounds: QData.rounds.length
@@ -43,7 +51,8 @@ Item {
     // --- State machine ---
     function startGame() {
         currentRound = 0;
-        score = 0;
+        player1Score = 0;
+        player2Score = 0;
         phase = "roundIntro";
     }
 
@@ -53,12 +62,16 @@ Item {
     }
 
     function _showQuestion() {
-        playerAnswer = -1;
-        answerLocked = false;
+        player1Answer = -1;
+        player2Answer = -1;
+        player1Locked = false;
+        player2Locked = false;
+        player1Correct = false;
+        player2Correct = false;
+        player1PointsEarned = 0;
+        player2PointsEarned = 0;
         answersRevealed = false;
         lastRoast = "";
-        lastCorrect = false;
-        lastPointsEarned = 0;
         timerValue = timerMax;
         timerRunning = false;
         phase = "question";
@@ -69,11 +82,16 @@ Item {
         timerRunning = true;
     }
 
-    function submitAnswer(index) {
-        if (answerLocked || !answersRevealed || phase !== "question") return;
-        playerAnswer = index;
-        answerLocked = true;
-        timerRunning = false;
+    function submitAnswer(playerIndex, answerIndex) {
+        if (!answersRevealed || phase !== "question") return;
+
+        if (playerIndex === 0 && !player1Locked) {
+            player1Answer = answerIndex;
+            player1Locked = true;
+        } else if (playerIndex === 1 && !player2Locked) {
+            player2Answer = answerIndex;
+            player2Locked = true;
+        }
     }
 
     function revealAnswer() {
@@ -83,16 +101,27 @@ Item {
         var q = currentQuestionData;
         if (!q) return;
 
-        lastCorrect = (playerAnswer === q.correct);
-        if (lastCorrect) {
-            var timeBonus = Math.floor(timerValue / timerMax * 50);
-            lastPointsEarned = 50 + timeBonus; // 50 base + up to 50 time bonus
-            score += lastPointsEarned;
+        // Score player 1
+        player1Correct = (player1Answer === q.correct);
+        if (player1Correct) {
+            var tb1 = Math.floor(timerValue / timerMax * 50);
+            player1PointsEarned = 50 + tb1;
+            player1Score += player1PointsEarned;
         } else {
-            lastPointsEarned = 0;
+            player1PointsEarned = 0;
         }
 
-        lastRoast = !lastCorrect ? q.roast : "";
+        // Score player 2
+        player2Correct = (player2Answer === q.correct);
+        if (player2Correct) {
+            var tb2 = Math.floor(timerValue / timerMax * 50);
+            player2PointsEarned = 50 + tb2;
+            player2Score += player2PointsEarned;
+        } else {
+            player2PointsEarned = 0;
+        }
+
+        lastRoast = (!player1Correct || !player2Correct) ? q.roast : "";
         phase = "reveal";
     }
 
@@ -122,15 +151,20 @@ Item {
     function restartGame() {
         currentRound = 0;
         currentQuestion = 0;
-        playerAnswer = -1;
-        answerLocked = false;
-        score = 0;
+        player1Answer = -1;
+        player2Answer = -1;
+        player1Locked = false;
+        player2Locked = false;
+        player1Score = 0;
+        player2Score = 0;
+        player1Correct = false;
+        player2Correct = false;
+        player1PointsEarned = 0;
+        player2PointsEarned = 0;
         timerValue = 0;
         timerRunning = false;
         answersRevealed = false;
         lastRoast = "";
-        lastCorrect = false;
-        lastPointsEarned = 0;
         phase = "title";
     }
 
@@ -191,11 +225,30 @@ Item {
                 color: "#333355"
             }
 
-            // Player (bottom half)
-            PlayerView {
+            // Players (bottom half, side by side)
+            Row {
                 width: parent.width
                 height: parent.height * 0.5 - 2
-                game: root
+
+                PlayerView {
+                    width: parent.width / 2
+                    height: parent.height
+                    game: root
+                    playerIndex: 0
+                }
+
+                Rectangle {
+                    width: 2
+                    height: parent.height
+                    color: "#333355"
+                }
+
+                PlayerView {
+                    width: parent.width / 2 - 2
+                    height: parent.height
+                    game: root
+                    playerIndex: 1
+                }
             }
         }
     }
