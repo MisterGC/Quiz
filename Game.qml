@@ -1,5 +1,5 @@
 import QtQuick
-import "QuestionData.js" as QData
+import "QuizParser.js" as QuizParser
 
 // TODO: Replace shared properties with clay_network P2P
 // Currently all three views share state via direct property bindings.
@@ -8,6 +8,23 @@ import "QuestionData.js" as QData
 
 Item {
     id: root
+
+    // --- Quiz content (parsed from questions.md) ---
+    property var quizData: null
+    readonly property string quizTitlePrefix: quizData ? quizData.titlePrefix : ""
+    readonly property string quizTitleName: quizData ? quizData.titleName : ""
+    readonly property string quizSubtitle: quizData ? quizData.subtitle : ""
+    readonly property string quizTitleMusic: quizData ? quizData.titleMusic : ""
+    readonly property var rounds: quizData ? quizData.rounds : []
+
+    Component.onCompleted: _loadQuiz()
+
+    function _loadQuiz() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", Qt.resolvedUrl("questions.md"), false);
+        xhr.send();
+        quizData = QuizParser.parse(xhr.responseText);
+    }
 
     // --- Game state ---
     property string phase: "title" // title|roundIntro|question|reveal|scoreboard|finale
@@ -33,9 +50,9 @@ Item {
     property int player2PointsEarned: 0
 
     // --- Derived ---
-    readonly property int totalRounds: QData.rounds.length
+    readonly property int totalRounds: rounds.length
     readonly property var currentRoundData: (currentRound >= 0 && currentRound < totalRounds)
-                                            ? QData.rounds[currentRound] : null
+                                            ? rounds[currentRound] : null
     readonly property var currentQuestionData: {
         if (!currentRoundData) return null;
         var qs = currentRoundData.questions;
@@ -43,8 +60,8 @@ Item {
     }
     readonly property int maxScore: {
         var total = 0;
-        for (var r = 0; r < QData.rounds.length; r++)
-            total += QData.rounds[r].questions.length * 100;
+        for (var r = 0; r < rounds.length; r++)
+            total += rounds[r].questions.length * 100;
         return total;
     }
 
