@@ -93,7 +93,7 @@ Item {
                         Behavior on opacity { NumberAnimation { duration: 200 } }
 
                         readonly property bool isInsult: root.game.currentRoundData
-                                                         && root.game.currentRoundData.mode === "insult"
+                                                         && root.game.currentRoundData.mode === "pirate-duel"
                         readonly property string label: isInsult
                                                         ? ["1", "2", "3", "4"][index]
                                                         : ["A", "B", "C", "D"][index]

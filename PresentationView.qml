@@ -23,40 +23,134 @@ Item {
         opacity: visible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 400 } }
 
-        Column {
-            anchors.centerIn: parent
-            spacing: 20
+        // Marquee light frame around the title
+        Item {
+            id: marqueeFrame
+            width: Math.min(parent.width * 0.8, 560)
+            height: 170
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: -30
 
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "RETRO"
-                color: root.gold
-                font { pixelSize: 42; bold: true; family: "monospace" }
-            }
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "RETRO RECKONING"
-                color: "#ffffff"
-                font { pixelSize: 64; bold: true; family: "monospace" }
-            }
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "~ Eine Retro Quizshow ~"
-                color: root.gold
-                font { pixelSize: 20; italic: true; family: "monospace" }
-            }
-            Item { width: 1; height: 30 }
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "Warte auf den Moderator ..."
-                color: "#88ffffff"
-                font { pixelSize: 16; family: "monospace" }
+            property int chasePos: 0
+            property int totalLights: 52
 
-                SequentialAnimation on opacity {
-                    loops: Animation.Infinite
-                    NumberAnimation { to: 0.3; duration: 1200 }
-                    NumberAnimation { to: 1.0; duration: 1200 }
+            Timer {
+                running: titleScreen.visible
+                interval: 55
+                repeat: true
+                onTriggered: marqueeFrame.chasePos =
+                    (marqueeFrame.chasePos + 1) % marqueeFrame.totalLights
+            }
+
+            Repeater {
+                model: marqueeFrame.totalLights
+
+                Rectangle {
+                    width: 8; height: 8; radius: 4
+
+                    property real perim: 2 * (marqueeFrame.width + marqueeFrame.height)
+                    property real pos: index / marqueeFrame.totalLights * perim
+
+                    x: {
+                        var w = marqueeFrame.width, h = marqueeFrame.height;
+                        if (pos < w) return pos - 4;
+                        if (pos < w + h) return w - 4;
+                        if (pos < 2 * w + h) return 2 * w + h - pos - 4;
+                        return -4;
+                    }
+                    y: {
+                        var w = marqueeFrame.width, h = marqueeFrame.height;
+                        if (pos < w) return -4;
+                        if (pos < w + h) return pos - w - 4;
+                        if (pos < 2 * w + h) return h - 4;
+                        return 2 * w + 2 * h - pos - 4;
+                    }
+
+                    property int dist: {
+                        var d = Math.abs(index - marqueeFrame.chasePos);
+                        var half = Math.floor(marqueeFrame.totalLights / 2);
+                        return d > half ? marqueeFrame.totalLights - d : d;
+                    }
+
+                    color: dist < 5 ? root.gold : (index % 2 === 0 ? "#333355" : "#222240")
+                    opacity: dist < 5 ? (1.0 - dist * 0.15) : 0.4
+
+                    Behavior on color { ColorAnimation { duration: 80 } }
+                    Behavior on opacity { NumberAnimation { duration: 80 } }
                 }
+            }
+
+            // Title text (centered in frame)
+            Column {
+                anchors.centerIn: parent
+                spacing: 2
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: root.game.quizTitlePrefix.toUpperCase()
+                    color: root.gold
+                    font { pixelSize: 26; bold: true; family: "monospace" }
+                }
+
+                // Glow layer behind main title
+                Item {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: titleText.width; height: titleText.height
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: titleText.text
+                        color: root.gold
+                        opacity: 0.25
+                        scale: titleText.scale * 1.08
+                        font: titleText.font
+                    }
+
+                    Text {
+                        id: titleText
+                        anchors.centerIn: parent
+                        text: root.game.quizTitleName.toUpperCase()
+                        color: "#ffffff"
+                        font { pixelSize: 72; bold: true; family: "monospace" }
+
+                        SequentialAnimation on scale {
+                            loops: Animation.Infinite
+                            NumberAnimation {
+                                to: 1.04; duration: 2000
+                                easing.type: Easing.InOutSine
+                            }
+                            NumberAnimation {
+                                to: 1.0; duration: 2000
+                                easing.type: Easing.InOutSine
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: marqueeFrame.bottom
+            anchors.topMargin: 20
+            text: "~ " + root.game.quizSubtitle + " ~"
+            color: root.gold
+            font { pixelSize: 20; italic: true; family: "monospace" }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: marqueeFrame.bottom
+            anchors.topMargin: 56
+            text: "Warte auf den Moderator ..."
+            color: "#88ffffff"
+            font { pixelSize: 16; family: "monospace" }
+
+            SequentialAnimation on opacity {
+                loops: Animation.Infinite
+                NumberAnimation { to: 0.3; duration: 1200 }
+                NumberAnimation { to: 1.0; duration: 1200 }
             }
         }
 
@@ -254,7 +348,7 @@ Item {
 
         property var qData: root.game.currentQuestionData
         property bool isInsult: root.game.currentRoundData
-                                ? root.game.currentRoundData.mode === "insult" : false
+                                ? root.game.currentRoundData.mode === "pirate-duel" : false
         property bool isReveal: root.game.phase === "reveal"
 
         // Background question number (large, faint)
@@ -373,7 +467,8 @@ Item {
                     Text {
                         anchors.left: answerLetterText.right
                         anchors.leftMargin: 14
-                        anchors.right: parent.right
+                        anchors.right: choiceTags.left
+                        anchors.rightMargin: 6
                         anchors.verticalCenter: parent.verticalCenter
                         text: modelData
                         color: {
@@ -391,6 +486,28 @@ Item {
                         }
                         wrapMode: Text.WordWrap
                         Behavior on color { ColorAnimation { duration: 300 } }
+                    }
+
+                    // Player choice tags (visible on reveal)
+                    Row {
+                        id: choiceTags
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+                        visible: questionScreen.isReveal
+
+                        Text {
+                            text: "S1"
+                            visible: parent.parent.isChosen1
+                            color: "#aaaacc"
+                            font { pixelSize: 12; bold: true; family: "monospace" }
+                        }
+                        Text {
+                            text: "S2"
+                            visible: parent.parent.isChosen2
+                            color: "#ccaaaa"
+                            font { pixelSize: 12; bold: true; family: "monospace" }
+                        }
                     }
                 }
             }
@@ -437,6 +554,18 @@ Item {
                         font { pixelSize: 22; bold: true; family: "monospace" }
                     }
                 }
+
+                // Locked-in indicator
+                Text {
+                    anchors.right: parent.right
+                    anchors.rightMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "✓"
+                    color: root.gold
+                    font { pixelSize: 18; bold: true }
+                    visible: root.game.player1Locked
+                             && root.game.phase === "question"
+                }
             }
 
             // Player 2 score
@@ -460,6 +589,18 @@ Item {
                         color: "#ffffff"
                         font { pixelSize: 22; bold: true; family: "monospace" }
                     }
+                }
+
+                // Locked-in indicator
+                Text {
+                    anchors.right: parent.right
+                    anchors.rightMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "✓"
+                    color: root.gold
+                    font { pixelSize: 18; bold: true }
+                    visible: root.game.player2Locked
+                             && root.game.phase === "question"
                 }
             }
         }

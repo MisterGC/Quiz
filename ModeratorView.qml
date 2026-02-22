@@ -146,7 +146,7 @@ Item {
                             var q = root.game.currentQuestionData;
                             if (!q) return "";
                             var labels = root.game.currentRoundData
-                                         && root.game.currentRoundData.mode === "insult"
+                                         && root.game.currentRoundData.mode === "pirate-duel"
                                          ? ["1", "2", "3", "4"] : ["A", "B", "C", "D"];
                             return labels[q.correct] + ": " + q.answers[q.correct];
                         }
