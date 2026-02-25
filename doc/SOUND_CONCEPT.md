@@ -51,12 +51,11 @@ funky retro game show theme, 90s hip-hop meets jazz, brass section, talk-sing, c
 **Lyrics:**
 ```
 [Intro, funky bass riff with brass stabs]
-
 [Verse 1, talk-sing, laid back but rhythmic]
 Erinnert ihr euch noch an damals?
-Game Boy unter der Bettdecke um halb zwei
-Bravo-Hits auf Kassette überspielt
-Und LAN-Partys, bei denen keiner geschlafen hat
+Aggressive Skating — Grinden und Springen bis die Knie bluten
+Die ganze Nacht durchzocken, LAN-Party ohne Schlaf
+Und Parties im Kunstpark Ost bis zum Morgengrauen
 
 [Verse 2, talk-sing, building energy]
 Ihr denkt, ihr wisst noch alles
@@ -73,18 +72,18 @@ Die Show, die Freundschaften auf die Probe stellt
 [Verse 3, talk-sing, announcer energy]
 Eure Gastgeber heute Abend
 Er lächelt wie ein Moderator und fragt wie ein Staatsanwalt
-Sein Charme ist echt, sein Mitleid nicht
+Sein Charme ist echt, sein Anspruch hoch
 Smooth, schlagfertig und absolut gnadenlos — Nico!
 
 [Verse 4, talk-sing, same energy]
 Und sein Partner in Crime
-Er begrüßt euch mit Stil und verabschiedet euer Selbstbewusstsein
+Er begrüßt euch mit Stil und bringt euch auf Touren
 Sein Pokerface ist Legende, sein Timing perfekt
 Der Mann mit dem Plan und den Fragen — Serein!
 
 [Chorus, sung, full energy]
 You Don't Know Rämpf!
-Ihr wisst gar nichts und das wird peinlich
+Zeigt was ihr könnt — seid ihr der Challenge gewachsen?
 You Don't Know Rämpf!
 Drück den Buzzer, lüg dich durch und hoffe auf Glück
 
