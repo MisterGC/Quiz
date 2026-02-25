@@ -1,4 +1,5 @@
 import QtQuick
+import Clayground.Sound
 
 Item {
     id: root
@@ -154,10 +155,89 @@ Item {
             }
         }
 
-        SoundTodo {
-            label: "Theme music loop"
-            anchors { bottom: parent.bottom; right: parent.right; margins: 8 }
+        // Sound hint (before music starts)
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 30
+            text: "🔊 Ton einschalten!"
+            color: root.gold
+            font { pixelSize: 16; family: "monospace" }
+            visible: !root.game.musicStarted
+
+            SequentialAnimation on opacity {
+                loops: Animation.Infinite
+                NumberAnimation { to: 0.3; duration: 1000 }
+                NumberAnimation { to: 1.0; duration: 1000 }
+            }
         }
+
+        Music {
+            id: titleMusic
+            source: "sound/title_song.mp3"
+            loop: false
+            volume: titleScreen.visible ? 1.0 : 0.0
+            onVolumeChanged: if (volume === 0 && !titleScreen.visible) stop()
+            Behavior on volume { NumberAnimation { duration: 1500 } }
+        }
+
+        Connections {
+            target: root.game
+            function onMusicStartedChanged() {
+                if (root.game.musicStarted) titleMusic.play();
+            }
+        }
+    }
+
+    Music {
+        id: roundJingle
+        source: "sound/new_round.mp3"
+    }
+
+    Music {
+        id: timeOutSound
+        source: "sound/time_out.mp3"
+    }
+    Connections {
+        target: root.game
+        function onTimerRunningChanged() {
+            if (!root.game.timerRunning && root.game.timerValue <= 0
+                && root.game.phase === "question")
+                timeOutSound.play();
+        }
+    }
+
+    Music {
+        id: lockInSound
+        source: "sound/lock_in.mp3"
+    }
+    Connections {
+        target: root.game
+        function onPlayer1LockedChanged() { if (root.game.player1Locked) lockInSound.play(); }
+        function onPlayer2LockedChanged() { if (root.game.player2Locked) lockInSound.play(); }
+    }
+
+    Music {
+        id: correctSound
+        source: "sound/correct_answer.mp3"
+    }
+
+    Music {
+        id: wrongSound
+        source: "sound/wrong_answer.mp3"
+    }
+
+    Music {
+        id: tensionMusic
+        source: "sound/waiting_for_answers.mp3"
+        loop: true
+        volume: root.game.answersRevealed && root.game.phase === "question" ? 1.0 : 0.0
+        onVolumeChanged: if (volume === 0 && root.game.phase !== "question") stop()
+        Behavior on volume { NumberAnimation { duration: 1500 } }
+
+        property bool shouldPlay: root.game.answersRevealed
+                                  && root.game.phase === "question"
+        onShouldPlayChanged: if (shouldPlay) play()
     }
 
     // --- Round Intro Screen (animated) ---
@@ -173,6 +253,7 @@ Item {
 
         onVisibleChanged: {
             if (visible) {
+                roundJingle.play();
                 revealedTagline = "";
                 taglineCharIdx = 0;
                 roundNumText.scale = 3.0;
@@ -350,6 +431,12 @@ Item {
         property bool isInsult: root.game.currentRoundData
                                 ? root.game.currentRoundData.mode === "pirate-duel" : false
         property bool isReveal: root.game.phase === "reveal"
+        property real displayScore1: root.game.player1Score
+        property real displayScore2: root.game.player2Score
+        property bool showRoast: false
+
+        Behavior on displayScore1 { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+        Behavior on displayScore2 { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
 
         // Background question number (large, faint)
         Text {
@@ -488,25 +575,44 @@ Item {
                         Behavior on color { ColorAnimation { duration: 300 } }
                     }
 
-                    // Player choice tags (visible on reveal)
+                    // Player choice pills (always visible, light up on reveal)
                     Row {
                         id: choiceTags
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 4
-                        visible: questionScreen.isReveal
+                        spacing: 6
 
-                        Text {
-                            text: "S1"
-                            visible: parent.parent.isChosen1
-                            color: "#aaaacc"
-                            font { pixelSize: 12; bold: true; family: "monospace" }
+                        Rectangle {
+                            width: 28; height: 18; radius: 4
+                            color: parent.parent.isChosen1 && questionScreen.isReveal
+                                   ? root.colA : "#1a1a2e"
+                            opacity: parent.parent.isChosen1 && questionScreen.isReveal
+                                     ? 1.0 : 0.2
+                            Behavior on color { ColorAnimation { duration: 300 } }
+                            Behavior on opacity { NumberAnimation { duration: 300 } }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "S1"
+                                color: "#ffffff"
+                                font { pixelSize: 10; bold: true; family: "monospace" }
+                            }
                         }
-                        Text {
-                            text: "S2"
-                            visible: parent.parent.isChosen2
-                            color: "#ccaaaa"
-                            font { pixelSize: 12; bold: true; family: "monospace" }
+                        Rectangle {
+                            width: 28; height: 18; radius: 4
+                            color: parent.parent.isChosen2 && questionScreen.isReveal
+                                   ? root.colD : "#1a1a2e"
+                            opacity: parent.parent.isChosen2 && questionScreen.isReveal
+                                     ? 1.0 : 0.2
+                            Behavior on color { ColorAnimation { duration: 300 } }
+                            Behavior on opacity { NumberAnimation { duration: 300 } }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "S2"
+                                color: "#ffffff"
+                                font { pixelSize: 10; bold: true; family: "monospace" }
+                            }
                         }
                     }
                 }
@@ -519,6 +625,9 @@ Item {
             anchors.bottom: scoreBar.top
             anchors.bottomMargin: 20
             visible: questionScreen.isReveal && root.game.lastRoast !== ""
+                     && questionScreen.showRoast
+            opacity: showRoast ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 400 } }
             text: root.game.lastRoast
             color: root.gold
             font { pixelSize: 20; italic: true; family: "monospace" }
@@ -535,7 +644,14 @@ Item {
             // Player 1 score
             Rectangle {
                 width: 160; height: 50; radius: 6
-                color: root.colA
+                color: root.game.player1Locked && root.game.phase === "question"
+                       ? Qt.lighter(root.colA, 1.6) : root.colA
+                border.width: root.game.player1Locked
+                              && root.game.phase === "question" ? 2 : 0
+                border.color: root.gold
+
+                Behavior on color { ColorAnimation { duration: 300 } }
+                Behavior on border.width { NumberAnimation { duration: 200 } }
 
                 Column {
                     anchors.centerIn: parent
@@ -549,29 +665,24 @@ Item {
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: root.game.player1Score.toString()
+                        text: Math.round(questionScreen.displayScore1).toString()
                         color: "#ffffff"
                         font { pixelSize: 22; bold: true; family: "monospace" }
                     }
-                }
-
-                // Locked-in indicator
-                Text {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 8
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "✓"
-                    color: root.gold
-                    font { pixelSize: 18; bold: true }
-                    visible: root.game.player1Locked
-                             && root.game.phase === "question"
                 }
             }
 
             // Player 2 score
             Rectangle {
                 width: 160; height: 50; radius: 6
-                color: root.colD
+                color: root.game.player2Locked && root.game.phase === "question"
+                       ? Qt.lighter(root.colD, 1.6) : root.colD
+                border.width: root.game.player2Locked
+                              && root.game.phase === "question" ? 2 : 0
+                border.color: root.gold
+
+                Behavior on color { ColorAnimation { duration: 300 } }
+                Behavior on border.width { NumberAnimation { duration: 200 } }
 
                 Column {
                     anchors.centerIn: parent
@@ -585,22 +696,10 @@ Item {
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: root.game.player2Score.toString()
+                        text: Math.round(questionScreen.displayScore2).toString()
                         color: "#ffffff"
                         font { pixelSize: 22; bold: true; family: "monospace" }
                     }
-                }
-
-                // Locked-in indicator
-                Text {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 8
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "✓"
-                    color: root.gold
-                    font { pixelSize: 18; bold: true }
-                    visible: root.game.player2Locked
-                             && root.game.phase === "question"
                 }
             }
         }
@@ -610,11 +709,136 @@ Item {
             anchors { bottom: scoreBar.top; left: parent.left; margins: 8 }
             visible: root.game.phase === "question"
         }
-        SoundTodo {
-            label: questionScreen.isReveal && root.game.player1Correct
-                   ? "Correct fanfare" : "Wrong shame jingle"
-            anchors { bottom: scoreBar.top; left: parent.left; margins: 8 }
-            visible: root.game.phase === "reveal"
+        // Floating points - Player 1
+        Text {
+            id: floatingPoints1
+            x: scoreBar.x + 80 - width / 2
+            y: scoreBar.y - 50
+            text: "+" + root.game.player1PointsEarned
+            color: root.game.player1Correct ? root.colCorrect : root.colWrong
+            font { pixelSize: 32; bold: true; family: "monospace" }
+            opacity: 0
+            scale: 1.5
+            transformOrigin: Item.Bottom
+        }
+
+        // Floating points - Player 2
+        Text {
+            id: floatingPoints2
+            x: scoreBar.x + 260 - width / 2
+            y: scoreBar.y - 50
+            text: "+" + root.game.player2PointsEarned
+            color: root.game.player2Correct ? root.colCorrect : root.colWrong
+            font { pixelSize: 32; bold: true; family: "monospace" }
+            opacity: 0
+            scale: 1.5
+            transformOrigin: Item.Bottom
+        }
+
+        // Sequential point reveal animation
+        SequentialAnimation {
+            id: pointRevealSequence
+
+            // --- Player 1 ---
+            ScriptAction {
+                script: {
+                    if (root.game.player1Correct)
+                        correctSound.play();
+                    else
+                        wrongSound.play();
+                }
+            }
+            ParallelAnimation {
+                NumberAnimation {
+                    target: floatingPoints1; property: "opacity"
+                    from: 0; to: 1.0; duration: 300
+                }
+                NumberAnimation {
+                    target: floatingPoints1; property: "scale"
+                    from: 1.5; to: 1.0; duration: 300
+                    easing.type: Easing.OutBack
+                }
+            }
+            PauseAnimation { duration: 500 }
+            ScriptAction { script: root.game.awardPoints(0) }
+            ParallelAnimation {
+                NumberAnimation {
+                    target: floatingPoints1; property: "scale"
+                    to: 0.3; duration: 400; easing.type: Easing.InCubic
+                }
+                NumberAnimation {
+                    target: floatingPoints1; property: "opacity"
+                    to: 0; duration: 400
+                }
+                NumberAnimation {
+                    target: floatingPoints1; property: "y"
+                    to: scoreBar.y; duration: 400; easing.type: Easing.InCubic
+                }
+            }
+
+            // --- Pause between players ---
+            PauseAnimation { duration: 400 }
+
+            // --- Player 2 ---
+            ScriptAction {
+                script: {
+                    if (root.game.player2Correct)
+                        correctSound.play();
+                    else
+                        wrongSound.play();
+                }
+            }
+            ParallelAnimation {
+                NumberAnimation {
+                    target: floatingPoints2; property: "opacity"
+                    from: 0; to: 1.0; duration: 300
+                }
+                NumberAnimation {
+                    target: floatingPoints2; property: "scale"
+                    from: 1.5; to: 1.0; duration: 300
+                    easing.type: Easing.OutBack
+                }
+            }
+            PauseAnimation { duration: 500 }
+            ScriptAction { script: root.game.awardPoints(1) }
+            ParallelAnimation {
+                NumberAnimation {
+                    target: floatingPoints2; property: "scale"
+                    to: 0.3; duration: 400; easing.type: Easing.InCubic
+                }
+                NumberAnimation {
+                    target: floatingPoints2; property: "opacity"
+                    to: 0; duration: 400
+                }
+                NumberAnimation {
+                    target: floatingPoints2; property: "y"
+                    to: scoreBar.y; duration: 400; easing.type: Easing.InCubic
+                }
+            }
+
+            // --- Show roast ---
+            PauseAnimation { duration: 300 }
+            ScriptAction { script: questionScreen.showRoast = true }
+        }
+
+        Connections {
+            target: root.game
+            function onPointRevealStarted() {
+                floatingPoints1.y = scoreBar.y - 50;
+                floatingPoints1.opacity = 0;
+                floatingPoints1.scale = 1.5;
+                floatingPoints2.y = scoreBar.y - 50;
+                floatingPoints2.opacity = 0;
+                floatingPoints2.scale = 1.5;
+                questionScreen.showRoast = false;
+                pointRevealSequence.restart();
+            }
+            function onPhaseChanged() {
+                if (root.game.phase !== "reveal") {
+                    pointRevealSequence.stop();
+                    questionScreen.showRoast = false;
+                }
+            }
         }
     }
 

@@ -8,6 +8,7 @@ import "QuizParser.js" as QuizParser
 
 Item {
     id: root
+    signal pointRevealStarted()
 
     // --- Quiz content (parsed from questions.md) ---
     property var quizData: null
@@ -21,12 +22,20 @@ Item {
 
     function _loadQuiz() {
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", Qt.resolvedUrl("questions.md"), false);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200 || xhr.status === 0)
+                    quizData = QuizParser.parse(xhr.responseText);
+                else
+                    console.error("Failed to load questions.md:", xhr.status);
+            }
+        };
+        xhr.open("GET", Qt.resolvedUrl("questions.md"));
         xhr.send();
-        quizData = QuizParser.parse(xhr.responseText);
     }
 
     // --- Game state ---
+    property bool musicStarted: false
     property string phase: "title" // title|roundIntro|question|reveal|scoreboard|finale
     property int currentRound: 0
     property int currentQuestion: 0
@@ -101,6 +110,7 @@ Item {
 
     function submitAnswer(playerIndex, answerIndex) {
         if (!answersRevealed || phase !== "question") return;
+        if (!timerRunning && timerValue <= 0) return;
 
         if (playerIndex === 0 && !player1Locked) {
             player1Answer = answerIndex;
@@ -109,6 +119,9 @@ Item {
             player2Answer = answerIndex;
             player2Locked = true;
         }
+
+        if (player1Locked && player2Locked)
+            timerRunning = false;
     }
 
     function revealAnswer() {
@@ -123,7 +136,6 @@ Item {
         if (player1Correct) {
             var tb1 = Math.floor(timerValue / timerMax * 50);
             player1PointsEarned = 50 + tb1;
-            player1Score += player1PointsEarned;
         } else {
             player1PointsEarned = 0;
         }
@@ -133,13 +145,20 @@ Item {
         if (player2Correct) {
             var tb2 = Math.floor(timerValue / timerMax * 50);
             player2PointsEarned = 50 + tb2;
-            player2Score += player2PointsEarned;
         } else {
             player2PointsEarned = 0;
         }
 
         lastRoast = (!player1Correct || !player2Correct) ? q.roast : "";
         phase = "reveal";
+        pointRevealStarted();
+    }
+
+    function awardPoints(playerIndex) {
+        if (playerIndex === 0)
+            player1Score += player1PointsEarned;
+        else if (playerIndex === 1)
+            player2Score += player2PointsEarned;
     }
 
     function nextStep() {
@@ -195,7 +214,6 @@ Item {
                 root.timerValue--;
             } else {
                 root.timerRunning = false;
-                root.revealAnswer();
             }
         }
     }

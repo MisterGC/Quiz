@@ -44,16 +44,47 @@ Item {
                 spacing: 16
                 visible: root.game.phase === "title"
 
+                // Before music: "Annnd Action!" button
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Ton auf Präsentations-PC\neinschalten, dann:"
+                    color: "#888888"
+                    font { pixelSize: 12; family: "monospace" }
+                    horizontalAlignment: Text.AlignHCenter
+                    visible: !root.game.musicStarted
+                }
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: 180; height: 44; radius: 6
+                    color: root.gold
+                    visible: !root.game.musicStarted
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Annnd Action!"
+                        color: "#1a1a2e"
+                        font { pixelSize: 16; bold: true; family: "monospace" }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.game.musicStarted = true
+                    }
+                }
+
+                // After music: "Spiel starten" button
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Spiel ist bereit"
                     color: "#cccccc"
                     font { pixelSize: 14; family: "monospace" }
+                    visible: root.game.musicStarted
                 }
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: 160; height: 44; radius: 6
                     color: "#2a7a3a"
+                    visible: root.game.musicStarted
 
                     Text {
                         anchors.centerIn: parent
