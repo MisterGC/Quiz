@@ -98,6 +98,47 @@ Item {
                         onClicked: root.game.startGame()
                     }
                 }
+
+                // Jump-to-round buttons
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 4
+                    visible: root.game.musicStarted
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "Direkt zu Runde:"
+                        color: "#666666"
+                        font { pixelSize: 10; family: "monospace" }
+                    }
+
+                    Flow {
+                        width: 220
+                        spacing: 4
+
+                        Repeater {
+                            model: root.game.rounds.length
+                            Rectangle {
+                                width: 105; height: 26; radius: 4
+                                color: "#333355"
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: (index + 1) + ". " + (root.game.rounds[index]
+                                          ? root.game.rounds[index].name.substring(0, 10)
+                                          : "")
+                                    color: "#aaaacc"
+                                    font { pixelSize: 9; family: "monospace" }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.game.jumpToRound(index)
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             // --- Round Intro phase ---

@@ -1,6 +1,5 @@
 import QtQuick
 import "QuizParser.js" as QuizParser
-import "DosEngine.js" as DosEngine
 
 // TODO: Replace shared properties with clay_network P2P
 // Currently all three views share state via direct property bindings.
@@ -54,9 +53,7 @@ Item {
     property bool singingTimerStarted: false
 
     // --- Console state ---
-    property string consoleOutput: ""
     property bool scenarioSolved: false
-    property var consoleState: null
 
     // --- Plank-duel state ---
     property int plankBasti: 0       // 0..4, at 4 = fallen off
@@ -104,6 +101,15 @@ Item {
     // --- State machine ---
     function startGame() {
         currentRound = 0;
+        player1Score = 0;
+        player2Score = 0;
+        phase = "roundIntro";
+    }
+
+    function jumpToRound(index) {
+        if (index < 0 || index >= totalRounds) return;
+        currentRound = index;
+        currentQuestion = 0;
         player1Score = 0;
         player2Score = 0;
         phase = "roundIntro";
@@ -252,12 +258,13 @@ Item {
     }
 
     // --- Console mode ---
+    // The actual DOS terminal runs in a separate browser window
+    // (dos/index.html). This just manages timer and scoring.
     function _startConsoleScenario() {
         var q = currentQuestionData;
-        var scenarioId = q ? q.scenario : "";
-        consoleState = DosEngine.createScenario(scenarioId);
-        consoleOutput = consoleState ? consoleState.output : "Error: Unknown scenario\n";
         scenarioSolved = false;
+        player1PointsEarned = 0;
+        player1Correct = false;
         timerValue = q && q.timer > 0 ? q.timer : 3000;
         timerMax = timerValue;
         timerRunning = false;
@@ -266,23 +273,6 @@ Item {
 
     function startConsoleTimer() {
         timerRunning = true;
-    }
-
-    function submitConsoleCommand(cmd) {
-        if (phase !== "console" || !consoleState) return;
-
-        var result = DosEngine.execute(consoleState, cmd);
-        if (result.cls)
-            consoleOutput = "C:\\>" + cmd + "\n" + result.output;
-        else
-            consoleOutput += "C:\\>" + cmd + "\n" + result.output;
-
-        if (result.solved) {
-            scenarioSolved = true;
-            timerRunning = false;
-            player1PointsEarned = 100;
-            player1Correct = true;
-        }
     }
 
     function resolveConsole(success) {
@@ -299,13 +289,7 @@ Item {
     }
 
     function nextConsoleStep() {
-        var qs = currentRoundData ? currentRoundData.questions : [];
-        if (currentQuestion + 1 < qs.length) {
-            currentQuestion++;
-            _startConsoleScenario();
-        } else {
-            phase = "scoreboard";
-        }
+        phase = "scoreboard";
     }
 
     // --- Plank-duel mode ---
@@ -499,9 +483,7 @@ Item {
         chosenInsultIdx = -1;
         currentDuelData = null;
         duelWinner = "";
-        consoleOutput = "";
         scenarioSolved = false;
-        consoleState = null;
         phase = "title";
     }
 

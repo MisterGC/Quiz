@@ -110,14 +110,15 @@
 ### Wing Commander startet nicht
 > Scenario: wc
 > Timer: 3000
-
-### Doom hat keinen Sound
-> Scenario: doom
-> Timer: 3000
-
-### Monkey Island installieren
-> Scenario: mi
-> Timer: 3000
+> Url: dos/index.html
+> Goal: Wing Commander zum Laufen bringen
+> Hint: cd games\wingcommander
+> Hint: wc.exe → Fehler, Hinweis auf emsmanager
+> Hint: cd \ && emsmanager → HIMEM.SYS fehlt
+> Hint: cd dos && edit config.sys
+> Hint: DEVICE=C:\DOS\HIMEM.SYS eintragen, F10
+> Hint: reboot
+> Hint: cd games\wingcommander && wc.exe
 
 ---
 

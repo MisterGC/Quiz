@@ -1,5 +1,4 @@
 import QtQuick
-import "DosEngine.js" as DosEngine
 
 Item {
     id: root
@@ -7,6 +6,7 @@ Item {
     property QtObject game: null
 
     readonly property color gold: "#ffcc00"
+    readonly property var qData: root.game ? root.game.currentQuestionData : null
 
     // --- Console phase ---
     Column {
@@ -22,7 +22,7 @@ Item {
             font { pixelSize: 14; bold: true; family: "monospace" }
         }
 
-        // Scenario info
+        // Scenario info (data-driven from questions.md)
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width - 10
@@ -40,24 +40,18 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.game.currentQuestionData
-                          ? root.game.currentQuestionData.text : ""
+                    text: root.qData ? root.qData.text : ""
                     color: "#00e676"
                     font { pixelSize: 13; bold: true; family: "monospace" }
                     wrapMode: Text.WordWrap
                     horizontalAlignment: Text.AlignHCenter
                 }
 
-                // Solution hints
                 Text {
                     width: parent.width
-                    text: {
-                        var q = root.game.currentQuestionData;
-                        if (!q || !q.scenario) return "";
-                        var scen = DosEngine.scenarios[q.scenario];
-                        if (!scen) return "";
-                        return "Ziel: " + scen.goal;
-                    }
+                    text: root.qData && root.qData.goal
+                          ? "Ziel: " + root.qData.goal : ""
+                    visible: text !== ""
                     color: "#aaddaa"
                     font { pixelSize: 11; family: "monospace" }
                     wrapMode: Text.WordWrap
@@ -66,15 +60,41 @@ Item {
                 Text {
                     width: parent.width
                     text: {
-                        var q = root.game.currentQuestionData;
-                        if (!q || !q.scenario) return "";
-                        var scen = DosEngine.scenarios[q.scenario];
-                        if (!scen || !scen.solution) return "";
-                        return "Schritte:\n" + scen.solution.join("\n");
+                        if (!root.qData || !root.qData.hints
+                            || root.qData.hints.length === 0) return "";
+                        var lines = "Hinweiskette:";
+                        for (var i = 0; i < root.qData.hints.length; i++)
+                            lines += "\n" + (i + 1) + ". " + root.qData.hints[i];
+                        return lines;
                     }
+                    visible: text !== ""
                     color: "#88aa88"
                     font { pixelSize: 10; family: "monospace" }
                     wrapMode: Text.WordWrap
+                }
+            }
+        }
+
+        // Open external terminal button
+        Rectangle {
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 180; height: 36; radius: 6
+            color: "#4a3a1a"
+            border.color: root.gold; border.width: 1
+            visible: root.qData && root.qData.url !== ""
+
+            Text {
+                anchors.centerIn: parent
+                text: "Terminal öffnen"
+                color: root.gold
+                font { pixelSize: 12; bold: true; family: "monospace" }
+            }
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    if (root.qData && root.qData.url)
+                        Qt.openUrlExternally(Qt.resolvedUrl(root.qData.url));
                 }
             }
         }

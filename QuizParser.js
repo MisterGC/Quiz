@@ -96,7 +96,10 @@ function parse(markdown) {
                 sound: "",
                 artist: "",
                 scenario: "",
-                timer: 0
+                timer: 0,
+                url: "",
+                goal: "",
+                hints: []
             };
             i++;
 
@@ -111,6 +114,12 @@ function parse(markdown) {
                     currentQuestion.timer = parseInt(qmeta.replace(/^Timer:\s*/i, "")) || 0;
                 else if (qmeta.match(/^Sound:\s*/i))
                     currentQuestion.sound = qmeta.replace(/^Sound:\s*/i, "");
+                else if (qmeta.match(/^Url:\s*/i))
+                    currentQuestion.url = qmeta.replace(/^Url:\s*/i, "");
+                else if (qmeta.match(/^Goal:\s*/i))
+                    currentQuestion.goal = qmeta.replace(/^Goal:\s*/i, "");
+                else if (qmeta.match(/^Hint:\s*/i))
+                    currentQuestion.hints.push(qmeta.replace(/^Hint:\s*/i, ""));
                 else if (currentQuestion.answers.length > 0 && !currentQuestion.roast)
                     currentQuestion.roast = qmeta;
                 i++;
@@ -156,7 +165,8 @@ function _finishQuestion(round, question) {
     if (!round || !question) return;
     // Singing/console questions have no answers but are still valid
     var hasAnswers = question.answers.length > 0;
-    var hasMeta = question.scenario !== "" || question.artist !== "";
+    var hasMeta = question.scenario !== "" || question.artist !== ""
+                  || question.url !== "";
     if (hasAnswers || hasMeta)
         round.questions.push(question);
 }

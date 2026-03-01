@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>DOS Terminal</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #000;
+  color: #c0c0c0;
+  font-family: "Courier New", monospace;
+  font-size: 16px;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+#terminal {
+  padding: 20px;
+  line-height: 1.4;
+}
+.cursor {
+  display: inline-block;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+/* CRT scanlines */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    transparent 0px, transparent 2px,
+    rgba(255,255,255,0.04) 2px, rgba(255,255,255,0.04) 3px
+  );
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="terminal">
+Microsoft(R) MS-DOS Version 6.22<br>
+(C)Copyright Microsoft Corp 1981-1994.<br>
+<br>
+C:\&gt;<span class="cursor">_</span>
+</div>
+</body>
+</html>
