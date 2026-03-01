@@ -45,10 +45,10 @@
 
 ---
 
-## Beleidigungsfechten
+## Duell auf der Affeninsel
 > Du kämpfst wie eine Kuh.
 > Sponsor: Gesponsert von Stans Gebrauchtschiff-Handel — Keine Rückgabe!
-> Type: pirate-duel
+> Type: plank-duel
 > Music: pirate_duel.mp3
 
 ### "Du kämpfst wie ein Bauer!"
@@ -56,61 +56,111 @@
 - [ ] Ich bin Gummi, du bist Leim.
 - [ ] Nein, DU kämpfst wie ein Bauer!
 - [ ] Ich hatte mal einen Bauernhof.
-> Selbst der Bauer schüttelt den Kopf.
 
 ### "Bald wirst du mein Schwert wie einen Schaschlikspieß tragen!"
 - [ ] Ich hab gerade keinen Hunger.
 - [x] Erst solltest du aufhören, damit herumzufuchteln wie mit einem Staubwedel.
 - [ ] Klingt eigentlich lecker.
 - [ ] Mein Schwert ist größer als deins.
-> Du könntest nicht mal ein Regal abstauben, geschweige denn fechten.
 
 ### "Die Leute fallen vor mir auf die Knie, wenn sie mich kommen sehen!"
 - [ ] Das wundert mich nicht, du stinkst fürchterlich.
 - [x] Sogar BEVOR sie deinen Atem riechen?
 - [ ] Das muss sehr beeindruckend sein.
 - [ ] Ich falle vor niemandem auf die Knie!
-> Dein Atem könnte ein Schiff aus 50 Schritten versenken.
 
 ### "Ich hab heute eine lange, scharfe Lektion für dich!"
 - [ ] Ich weiß jetzt schon mehr, als du je vergessen wirst.
 - [x] Und ich hab einen kleinen TIPP für dich — kapier die POINTE!
 - [ ] Ich lerne schnell.
 - [ ] Lektionen sind was für die Schule!
-> Die einzige Pointe, die du je kriegst, ist die auf deinem Kopf.
+
+### "Mein Schwert ist berühmt in allen Häfen!"
+- [ ] Dein Schwert ist so stumpf wie dein Witz.
+- [ ] Berühmt? Das bezweifle ich.
+- [x] Kein Wunder, du benutzt es ja zum Aufschneiden!
+- [ ] Mein Schwert kennt man auch.
+
+### "Jeder Gegner, dem ich je begegnet bin, hat klein beigegeben!"
+- [x] Du hast offensichtlich noch nie dein Spiegelbild gesehen.
+- [ ] Dann wirst du jetzt eine Überraschung erleben.
+- [ ] Das ist beeindruckend.
+- [ ] Ich gebe niemals auf!
+
+### "Meine Narben erzählen Geschichten von tausend Schlachten!"
+- [ ] Tausend Schlachten? Eher tausend Hinfaller.
+- [ ] Ich hab auch Narben.
+- [x] Hatte der andere Pirat ein Messer oder eine Nähnadel?
+- [ ] Das klingt schmerzhaft.
+
+### "Niemand hat je meinen Angriff überlebt!"
+- [ ] Dann bin ich wohl der Erste.
+- [x] Das liegt daran, dass sie vor Lachen gestorben sind!
+- [ ] Da bin ich aber nervös.
+- [ ] Wir werden sehen.
 
 ---
 
-## Retro-PC-Überlebenskampf
+## Wenig RAM und schwere Röhren
 > Damals, als 640K für jeden reichten.
 > Sponsor: Powered by Turbo Pascal™ — Kompiliere deine Träume!
-> Type: quiz
+> Type: dos-console
 > Music: round3_jingle.mp3
 
-### Was hast du in DOS eingegeben, um konventionellen Speicher freizumachen, bevor du ein Spiel starten konntest?
-- [ ] MEMFREE.EXE
-- [x] HIMEM.SYS + EMM386.EXE in CONFIG.SYS
-- [ ] FORMAT C:
-- [ ] DELTREE /Y C:\WINDOWS
-> Du hast bestimmt auch mal COMMAND.COM gelöscht.
+### Wing Commander startet nicht
+> Scenario: wc
+> Timer: 3000
 
-### Welche IRQ-Nummer hat man typischerweise für eine Sound Blaster Karte eingestellt?
-- [ ] IRQ 3
-- [x] IRQ 5
-- [ ] IRQ 9
-- [ ] IRQ 15
-> Kein Sound für dich. Wie dein Liebesleben.
+### Doom hat keinen Sound
+> Scenario: doom
+> Timer: 3000
 
-### Welches Speichermedium fasste satte 1,44 MB?
-- [ ] ZIP Disk
-- [x] 3,5"-Diskette
-- [ ] Compact Disc
-- [ ] Jaz Drive
-> 1,44 MB — immer noch mehr Daten als dein Dating-Profil.
+### Monkey Island installieren
+> Scenario: mi
+> Timer: 3000
 
-### Was bedeutete 'Abort, Retry, Fail?' in DOS?
-- [ ] Dein Spiel wurde erfolgreich gespeichert
-- [x] Ein kritischer Lese-/Schreibfehler ist aufgetreten
-- [ ] Windows war kurz davor, sich zu installieren
-- [ ] Du musstest die nächste Diskette einlegen
-> Abort, Retry, Fail — auch die Geschichte deiner Frisuren.
+---
+
+## Eine Frage des Geschmacks
+> Was passt besser zu dir?
+> Sponsor: Gesponsert von Dr. Oetker Pizza — Weil selbst kochen Zeitverschwendung ist!
+> Type: taste
+
+### Tee oder Kaffee?
+- Tee
+- Kaffee
+
+### Star Wars oder Star Trek?
+- Star Wars
+- Star Trek
+
+### Konsole oder PC?
+- Konsole
+- PC
+
+### Sommer oder Winter?
+- Sommer
+- Winter
+
+### Pizza Hawaii — ja oder nein?
+- Ja, Ananas gehört drauf
+- Nein, niemals
+
+---
+
+## Verstimmte Gabel
+> Basti singt, ihr ratet!
+> Sponsor: Gesponsert von Shazam — Hilft leider nicht bei live Gesang!
+> Type: singing
+
+### Eye of the Tiger
+> Artist: Survivor
+> Timer: 200
+
+### Take On Me
+> Artist: a-ha
+> Timer: 200
+
+### Livin' on a Prayer
+> Artist: Bon Jovi
+> Timer: 200

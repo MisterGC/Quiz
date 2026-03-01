@@ -93,25 +93,47 @@ function parse(markdown) {
                 answers: [],
                 correct: -1,
                 roast: "",
-                sound: ""
+                sound: "",
+                artist: "",
+                scenario: "",
+                timer: 0
             };
             i++;
 
-            // Check for Sound: line right after heading
-            if (i < lines.length && lines[i].match(/^Sound:\s*/i)) {
-                currentQuestion.sound = lines[i].replace(/^Sound:\s*/i, "").trim();
+            // Parse metadata lines after heading (> Key: Value)
+            while (i < lines.length && lines[i].match(/^> /)) {
+                var qmeta = lines[i].replace(/^> /, "").trim();
+                if (qmeta.match(/^Artist:\s*/i))
+                    currentQuestion.artist = qmeta.replace(/^Artist:\s*/i, "");
+                else if (qmeta.match(/^Scenario:\s*/i))
+                    currentQuestion.scenario = qmeta.replace(/^Scenario:\s*/i, "");
+                else if (qmeta.match(/^Timer:\s*/i))
+                    currentQuestion.timer = parseInt(qmeta.replace(/^Timer:\s*/i, "")) || 0;
+                else if (qmeta.match(/^Sound:\s*/i))
+                    currentQuestion.sound = qmeta.replace(/^Sound:\s*/i, "");
+                else if (currentQuestion.answers.length > 0 && !currentQuestion.roast)
+                    currentQuestion.roast = qmeta;
                 i++;
             }
             continue;
         }
 
-        // Answer line
+        // Answer line (checkbox style: quiz/pirate-duel/plank-duel)
         if (currentQuestion && line.match(/^- \[[ x]\] /)) {
             var isCorrect = line.match(/^- \[x\] /) !== null;
             var answerText = line.replace(/^- \[[ x]\] /, "").trim();
             if (isCorrect)
                 currentQuestion.correct = currentQuestion.answers.length;
             currentQuestion.answers.push(answerText);
+            i++;
+            continue;
+        }
+
+        // Plain list answer (taste mode: no checkbox)
+        if (currentQuestion && currentRound
+            && currentRound.mode === "taste" && line.match(/^- /)) {
+            var tasteAnswer = line.replace(/^- /, "").trim();
+            currentQuestion.answers.push(tasteAnswer);
             i++;
             continue;
         }
@@ -131,6 +153,10 @@ function parse(markdown) {
 }
 
 function _finishQuestion(round, question) {
-    if (round && question && question.answers.length > 0)
+    if (!round || !question) return;
+    // Singing/console questions have no answers but are still valid
+    var hasAnswers = question.answers.length > 0;
+    var hasMeta = question.scenario !== "" || question.artist !== "";
+    if (hasAnswers || hasMeta)
         round.questions.push(question);
 }

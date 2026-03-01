@@ -58,22 +58,34 @@ Item {
             width: parent.width
             height: parent.height - 36
 
-            // --- Waiting (title / roundIntro / scoreboard) ---
+            // --- Waiting (title / roundIntro / scoreboard / singing / console) ---
             Text {
                 anchors.centerIn: parent
                 visible: root.game.phase === "title"
                          || root.game.phase === "roundIntro"
                          || root.game.phase === "scoreboard"
+                         || root.game.phase === "singingActive"
+                         || root.game.phase === "singingReveal"
+                         || root.game.phase === "console"
+                         || root.game.phase === "consoleResult"
                 text: {
                     if (root.game.phase === "title") return "...";
                     if (root.game.phase === "roundIntro") return "Bereit!";
+                    if (root.game.phase === "singingActive"
+                        || root.game.phase === "singingReveal")
+                        return "Mods vergeben\nPunkte";
+                    if (root.game.phase === "console"
+                        || root.game.phase === "consoleResult")
+                        return "Solo-Runde";
                     return "...";
                 }
                 color: "#888888"
                 font { pixelSize: 12; family: "monospace" }
+                horizontalAlignment: Text.AlignHCenter
             }
 
-            // --- Question phase: A/B/C/D buttons only ---
+            // --- Question phase: answer buttons ---
+            // 4-button grid (quiz, pirate-duel, plank-duel)
             Grid {
                 id: buttonGrid
                 anchors.fill: parent
@@ -81,6 +93,9 @@ Item {
                 columns: 2
                 spacing: 4
                 visible: root.game.phase === "question"
+                         && root.game.currentMode !== "taste"
+                         && root.game.currentMode !== "singing"
+                         && root.game.currentMode !== "dos-console"
 
                 Repeater {
                     model: root.game.answersRevealed ? 4 : 0
@@ -93,7 +108,8 @@ Item {
                         Behavior on opacity { NumberAnimation { duration: 200 } }
 
                         readonly property bool isInsult: root.game.currentRoundData
-                                                         && root.game.currentRoundData.mode === "pirate-duel"
+                                                         && (root.game.currentRoundData.mode === "pirate-duel"
+                                                             || root.game.currentRoundData.mode === "plank-duel")
                         readonly property string label: isInsult
                                                         ? ["1", "2", "3", "4"][index]
                                                         : ["A", "B", "C", "D"][index]
@@ -130,6 +146,201 @@ Item {
                         }
                     }
                 }
+            }
+
+            // 2-button stack (taste mode)
+            Column {
+                id: tasteButtons
+                anchors.fill: parent
+                anchors.margins: 6
+                spacing: 6
+                visible: root.game.phase === "question"
+                         && root.game.currentMode === "taste"
+
+                Repeater {
+                    model: root.game.answersRevealed
+                           ? (root.game.currentQuestionData
+                              ? root.game.currentQuestionData.answers : [])
+                           : []
+
+                    Rectangle {
+                        width: tasteButtons.width
+                        height: (tasteButtons.height - tasteButtons.spacing) / 2
+                        radius: 8
+
+                        readonly property color btnColor: index === 0
+                                                          ? root.answerColors[0]
+                                                          : root.answerColors[3]
+
+                        color: {
+                            if (root.myLocked && root.myAnswer === index)
+                                return Qt.lighter(btnColor, 1.3);
+                            if (root.myLocked)
+                                return Qt.darker(btnColor, 1.5);
+                            return btnColor;
+                        }
+                        border.color: root.myLocked && root.myAnswer === index
+                                      ? root.gold : "transparent"
+                        border.width: root.myLocked && root.myAnswer === index
+                                      ? 3 : 0
+
+                        Behavior on color { ColorAnimation { duration: 200 } }
+
+                        Text {
+                            anchors.centerIn: parent
+                            width: parent.width - 12
+                            text: modelData
+                            color: "#ffffff"
+                            font { pixelSize: 16; bold: true; family: "monospace" }
+                            wrapMode: Text.WordWrap
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: root.myLocked
+                                         ? Qt.ArrowCursor : Qt.PointingHandCursor
+                            onClicked: {
+                                if (!root.myLocked)
+                                    root.game.submitAnswer(root.playerIndex, index);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // No-interaction modes
+            Text {
+                anchors.centerIn: parent
+                visible: root.game.phase === "question"
+                         && (root.game.currentMode === "singing"
+                             || root.game.currentMode === "dos-console")
+                text: root.game.currentMode === "singing"
+                      ? "Mods vergeben\nPunkte"
+                      : "Solo-Runde"
+                color: "#666666"
+                font { pixelSize: 12; family: "monospace" }
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            // --- Duel Pick: Crowd (player 2) chooses insult ---
+            Column {
+                anchors.fill: parent
+                anchors.margins: 6
+                spacing: 4
+                visible: root.game.phase === "duelPick"
+
+                Repeater {
+                    model: root.playerIndex === 1 ? root.game.insultChoices : []
+
+                    Rectangle {
+                        width: parent.width
+                        height: (parent.height - parent.spacing * 2) / 3
+                        radius: 6
+                        color: root.answerColors[index % root.answerColors.length]
+
+                        Text {
+                            anchors.centerIn: parent
+                            width: parent.width - 8
+                            text: {
+                                var qs = root.game.currentRoundData
+                                         ? root.game.currentRoundData.questions : [];
+                                return (modelData >= 0 && modelData < qs.length)
+                                       ? (index + 1) + "" : "";
+                            }
+                            color: "#ffffff"
+                            font { pixelSize: 18; bold: true; family: "monospace" }
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.game.submitInsultChoice(modelData)
+                        }
+                    }
+                }
+
+                // Player 1 waits
+                Text {
+                    width: parent.width
+                    visible: root.playerIndex === 0
+                             && root.game.phase === "duelPick"
+                    text: "Crowd w\u00e4hlt..."
+                    color: "#888888"
+                    font { pixelSize: 12; family: "monospace" }
+                    horizontalAlignment: Text.AlignHCenter
+                }
+            }
+
+            // --- Duel Counter: Basti (player 1) picks counter ---
+            Column {
+                anchors.fill: parent
+                anchors.margins: 6
+                spacing: 4
+                visible: root.game.phase === "duelCounter"
+
+                Repeater {
+                    model: root.playerIndex === 0
+                           && root.game.currentDuelData
+                           ? root.game.currentDuelData.answers : []
+
+                    Rectangle {
+                        width: parent.width
+                        height: (parent.height - parent.spacing * 3) / 4
+                        radius: 6
+
+                        color: {
+                            if (root.myLocked && root.myAnswer === index)
+                                return Qt.lighter(root.answerColors[index], 1.3);
+                            if (root.myLocked)
+                                return Qt.darker(root.answerColors[index], 1.5);
+                            return root.answerColors[index];
+                        }
+                        border.color: root.myLocked && root.myAnswer === index
+                                      ? root.gold : "transparent"
+                        border.width: root.myLocked && root.myAnswer === index
+                                      ? 2 : 0
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: (index + 1).toString()
+                            color: "#ffffff"
+                            font { pixelSize: 20; bold: true; family: "monospace" }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: root.myLocked
+                                         ? Qt.ArrowCursor : Qt.PointingHandCursor
+                            onClicked: {
+                                if (!root.myLocked)
+                                    root.game.submitDuelCounter(index);
+                            }
+                        }
+                    }
+                }
+
+                // Player 2 waits
+                Text {
+                    width: parent.width
+                    visible: root.playerIndex === 1
+                             && root.game.phase === "duelCounter"
+                    text: "Basti kontert..."
+                    color: "#888888"
+                    font { pixelSize: 12; family: "monospace" }
+                    horizontalAlignment: Text.AlignHCenter
+                }
+            }
+
+            // --- Duel Result ---
+            Text {
+                anchors.centerIn: parent
+                visible: root.game.phase === "duelResult"
+                text: root.game.player1Correct
+                      ? "Touche!" : "Daneben!"
+                color: root.game.player1Correct ? "#00e676" : "#ff1744"
+                font { pixelSize: 14; bold: true; family: "monospace" }
             }
 
             // --- Reveal phase ---

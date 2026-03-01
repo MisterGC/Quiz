@@ -1,5 +1,16 @@
 module quiz
+Game 1.0 Game.qml
 PresentationView 1.0 PresentationView.qml
+PresentationQuiz 1.0 PresentationQuiz.qml
+PresentationTaste 1.0 PresentationTaste.qml
+PresentationSinging 1.0 PresentationSinging.qml
+PresentationPlankDuel 1.0 PresentationPlankDuel.qml
+PresentationConsole 1.0 PresentationConsole.qml
 ModeratorView 1.0 ModeratorView.qml
+ModeratorQuiz 1.0 ModeratorQuiz.qml
+ModeratorTaste 1.0 ModeratorTaste.qml
+ModeratorSinging 1.0 ModeratorSinging.qml
+ModeratorPlankDuel 1.0 ModeratorPlankDuel.qml
+ModeratorConsole 1.0 ModeratorConsole.qml
 PlayerView 1.0 PlayerView.qml
 SoundTodo 1.0 SoundTodo.qml
