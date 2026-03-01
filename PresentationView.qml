@@ -240,6 +240,21 @@ Item {
         onShouldPlayChanged: if (shouldPlay) play()
     }
 
+    Music {
+        id: swordFightMusic
+        source: "sound/sword_fighting.mp3"
+        loop: true
+        volume: isDuelPhase ? 1.0 : 0.0
+        onVolumeChanged: if (volume === 0 && !isDuelPhase) stop()
+        Behavior on volume { NumberAnimation { duration: 1500 } }
+
+        property bool isDuelPhase: (root.game.phase === "duelPick"
+                                    || root.game.phase === "duelCounter"
+                                    || root.game.phase === "duelResult")
+                                   && root.game.duelWinner === ""
+        onIsDuelPhaseChanged: if (isDuelPhase) play()
+    }
+
     // --- Round Intro Screen (animated) ---
     Item {
         id: roundIntroScreen

@@ -21,6 +21,12 @@ Item {
         width: parent.width * 0.85
         height: 120
 
+        // Battle line: both fighters move as a pair
+        readonly property real stepSize: 0.0875
+        readonly property real pairCenter: 0.5
+            - stepSize * ((root.game ? root.game.plankBasti : 0)
+                        - (root.game ? root.game.plankCrowd : 0))
+
         // Water background
         Rectangle {
             anchors.fill: parent
@@ -33,7 +39,7 @@ Item {
         Rectangle {
             id: plank
             anchors.centerIn: parent
-            width: (root.game && root.game.plankShrunk) ? parent.width * 0.5 : parent.width * 0.8
+            width: (root.game && root.game.plankShrunk) ? 88 : parent.width * 0.8
             height: 20
             radius: 4
             color: "#8B4513"
@@ -55,17 +61,20 @@ Item {
             }
         }
 
-        // Basti sprite (left side, moves right when pushed)
+        // Basti sprite (left of battle line, follows the pair)
         Rectangle {
             id: bastiSprite
+            property bool fallen: root.game && root.game.duelWinner === "crowd"
             width: 40; height: 50; radius: 6
             color: root.colA
             border.color: "#ffffff"
             border.width: 2
-            x: plank.x + plank.width * 0.1
-               + (plank.width * 0.35) * ((root.game ? root.game.plankBasti : 0) / 4.0)
-            y: plank.y - height
+            x: plank.x + plankArea.pairCenter * plank.width - width - 4
+            y: fallen ? plank.y + 10 : plank.y - height
+            rotation: fallen ? 90 : 0
             Behavior on x { NumberAnimation { duration: 500; easing.type: Easing.OutBounce } }
+            Behavior on y { NumberAnimation { duration: 400; easing.type: Easing.InQuad } }
+            Behavior on rotation { NumberAnimation { duration: 400; easing.type: Easing.InQuad } }
 
             Column {
                 anchors.centerIn: parent
@@ -84,18 +93,20 @@ Item {
             }
         }
 
-        // Crowd sprite (right side, moves left when pushed)
+        // Crowd sprite (right of battle line, follows the pair)
         Rectangle {
             id: crowdSprite
+            property bool fallen: root.game && root.game.duelWinner === "basti"
             width: 40; height: 50; radius: 6
             color: root.colD
             border.color: "#ffffff"
             border.width: 2
-            x: plank.x + plank.width * 0.9
-               - width
-               - (plank.width * 0.35) * ((root.game ? root.game.plankCrowd : 0) / 4.0)
-            y: plank.y - height
+            x: plank.x + plankArea.pairCenter * plank.width + 4
+            y: fallen ? plank.y + 10 : plank.y - height
+            rotation: fallen ? -90 : 0
             Behavior on x { NumberAnimation { duration: 500; easing.type: Easing.OutBounce } }
+            Behavior on y { NumberAnimation { duration: 400; easing.type: Easing.InQuad } }
+            Behavior on rotation { NumberAnimation { duration: 400; easing.type: Easing.InQuad } }
 
             Column {
                 anchors.centerIn: parent

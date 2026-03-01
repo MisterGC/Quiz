@@ -329,6 +329,7 @@ Item {
     function submitInsultChoice(choiceIdx) {
         if (phase !== "duelPick") return;
         chosenInsultIdx = choiceIdx;
+        player2Locked = true;
         var used = usedInsults.slice();
         used.push(choiceIdx);
         usedInsults = used;
