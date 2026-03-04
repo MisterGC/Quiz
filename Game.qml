@@ -59,10 +59,10 @@ Item {
     property int plankBasti: 0       // 0..4, at 4 = fallen off
     property int plankCrowd: 0       // 0..4
     property int duelTurn: 0
-    property int duelMaxTurns: 4
+    property int duelMaxTurns: 7
     property bool plankShrunk: false
     property var usedInsults: []
-    property var insultChoices: []    // 3 insult indices for crowd to pick
+    property var insultChoices: []    // 4 insult indices for crowd to pick
     property int chosenInsultIdx: -1  // which insult was picked
     property var currentDuelData: null // the chosen insult/counter data
     property string duelWinner: ""
@@ -315,7 +315,7 @@ Item {
             available[j] = available[k];
             available[k] = tmp;
         }
-        insultChoices = available.slice(0, Math.min(3, available.length));
+        insultChoices = available.slice(0, Math.min(4, available.length));
         chosenInsultIdx = -1;
         currentDuelData = null;
         player1Answer = -1;

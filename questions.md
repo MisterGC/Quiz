@@ -51,53 +51,101 @@
 > Type: plank-duel
 > Music: pirate_duel.mp3
 
-### "Du kämpfst wie ein Bauer!"
+### "Du kämpfst wie ein dummer Bauer!"
 - [x] Wie passend. Du kämpfst wie eine Kuh.
-- [ ] Ich bin Gummi, du bist Leim.
-- [ ] Nein, DU kämpfst wie ein Bauer!
-- [ ] Ich hatte mal einen Bauernhof.
+- [ ] Vielleicht solltest du es endlich mal benutzen?
+- [ ] Also hast du doch den Job als Putzer gekriegt.
+- [ ] Hattest du das nicht vor kurzem getan?
 
-### "Bald wirst du mein Schwert wie einen Schaschlikspieß tragen!"
-- [ ] Ich hab gerade keinen Hunger.
-- [x] Erst solltest du aufhören, damit herumzufuchteln wie mit einem Staubwedel.
-- [ ] Klingt eigentlich lecker.
-- [ ] Mein Schwert ist größer als deins.
+### "Mein Schwert wird Dich durchbohren wie einen Schaschlik!"
+- [x] Dann mach nicht damit rum wie mit einem Staubwedel.
+- [ ] Er muß dir das Fechten beigebracht haben.
+- [ ] Zu schade, dass DICH überhaupt niemand kennt.
+- [ ] Auch bevor sie deinen Atem riechen?
 
-### "Die Leute fallen vor mir auf die Knie, wenn sie mich kommen sehen!"
-- [ ] Das wundert mich nicht, du stinkst fürchterlich.
-- [x] Sogar BEVOR sie deinen Atem riechen?
-- [ ] Das muss sehr beeindruckend sein.
-- [ ] Ich falle vor niemandem auf die Knie!
+### "Jeder hier kennt Dich doch als unerfahrenen Dummkopf!"
+- [x] Zu schade, dass DICH überhaupt niemand kennt.
+- [ ] Du kannst SO schnell davon laufen?
+- [ ] Doch, doch, du hast sie nur nie gelernt.
+- [ ] Und du wirst deine rostige Klinge nie wieder sehen.
 
-### "Ich hab heute eine lange, scharfe Lektion für dich!"
-- [ ] Ich weiß jetzt schon mehr, als du je vergessen wirst.
-- [x] Und ich hab einen kleinen TIPP für dich — kapier die POINTE!
-- [ ] Ich lerne schnell.
-- [ ] Lektionen sind was für die Schule!
+### "Du hast die Manieren eines Bettlers."
+- [x] Ich wollte, dass du dich wie zuhause fühlst.
+- [ ] Willst du mich mit deinem Geschwafel ermüden?
+- [ ] Aha, du warst also beim letzten Familientreffen.
+- [ ] Dann mach nicht damit rum wie mit einem Staubwedel.
 
-### "Mein Schwert ist berühmt in allen Häfen!"
-- [ ] Dein Schwert ist so stumpf wie dein Witz.
-- [ ] Berühmt? Das bezweifle ich.
-- [x] Kein Wunder, du benutzt es ja zum Aufschneiden!
-- [ ] Mein Schwert kennt man auch.
+### "Niemand wird mich verlieren sehen, du auch nicht!"
+- [x] Du kannst SO schnell davon laufen?
+- [ ] Also hast du doch den Job als Putzer gekriegt.
+- [ ] Doch, doch, du hast sie nur nie gelernt.
+- [ ] Hattest du das nicht vor kurzem getan?
 
-### "Jeder Gegner, dem ich je begegnet bin, hat klein beigegeben!"
-- [x] Du hast offensichtlich noch nie dein Spiegelbild gesehen.
-- [ ] Dann wirst du jetzt eine Überraschung erleben.
-- [ ] Das ist beeindruckend.
-- [ ] Ich gebe niemals auf!
+### "Ich hatte mal einen Hund, der war klüger als du."
+- [x] Er muß dir das Fechten beigebracht haben.
+- [ ] Ich wollte, dass du dich wie zuhause fühlst.
+- [ ] Auch bevor sie deinen Atem riechen?
+- [ ] Vielleicht solltest du es endlich mal benutzen?
 
-### "Meine Narben erzählen Geschichten von tausend Schlachten!"
-- [ ] Tausend Schlachten? Eher tausend Hinfaller.
-- [ ] Ich hab auch Narben.
-- [x] Hatte der andere Pirat ein Messer oder eine Nähnadel?
-- [ ] Das klingt schmerzhaft.
+### "Menschen fallen mir zu Füßen, wenn ich komme!"
+- [x] Auch bevor sie deinen Atem riechen?
+- [ ] Du kannst SO schnell davon laufen?
+- [ ] Und du wirst deine rostige Klinge nie wieder sehen.
+- [ ] Willst du mich mit deinem Geschwafel ermüden?
 
-### "Niemand hat je meinen Angriff überlebt!"
-- [ ] Dann bin ich wohl der Erste.
-- [x] Das liegt daran, dass sie vor Lachen gestorben sind!
-- [ ] Da bin ich aber nervös.
-- [ ] Wir werden sehen.
+### "An deiner Stelle würde ich zur Landratte werden!"
+- [x] Hattest du das nicht vor kurzem getan?
+- [ ] Dann mach nicht damit rum wie mit einem Staubwedel.
+- [ ] Zu schade, dass DICH überhaupt niemand kennt.
+- [ ] Also hast du doch den Job als Putzer gekriegt.
+
+### "Dein Schwert hat schon bessere Zeiten gesehen."
+- [x] Und du wirst deine rostige Klinge nie wieder sehen.
+- [ ] Doch, doch, du hast sie nur nie gelernt.
+- [ ] Er muß dir das Fechten beigebracht haben.
+- [ ] Ich wollte, dass du dich wie zuhause fühlst.
+
+### "Ich kenne einige Affen, die haben mehr drauf als du."
+- [x] Aha, du warst also beim letzten Familientreffen.
+- [ ] Auch bevor sie deinen Atem riechen?
+- [ ] Du kannst SO schnell davon laufen?
+- [ ] Vielleicht solltest du es endlich mal benutzen?
+
+### "Keine Worte beschreiben deine Hässlichkeit."
+- [x] Doch, doch, du hast sie nur nie gelernt.
+- [ ] Zu schade, dass DICH überhaupt niemand kennt.
+- [ ] Also hast du doch den Job als Putzer gekriegt.
+- [ ] Er muß dir das Fechten beigebracht haben.
+
+### "Willst du hören, wie ich 3 Männer zugleich besiegte?"
+- [x] Willst du mich mit deinem Geschwafel ermüden?
+- [ ] Hattest du das nicht vor kurzem getan?
+- [ ] Wie passend. Du kämpfst wie eine Kuh.
+- [ ] Aha, mal wieder in der Nase gebohrt, wie?
+
+### "Mit meinem Taschentuch werde ich dein Blut aufwischen!"
+- [x] Also hast du doch den Job als Putzer gekriegt.
+- [ ] Und du wirst deine rostige Klinge nie wieder sehen.
+- [ ] Auch bevor sie deinen Atem riechen?
+- [ ] Ich wollte, dass du dich wie zuhause fühlst.
+
+### "Du bist kein echter Gegner für mein geschultes Hirn!"
+- [x] Vielleicht solltest du es endlich mal benutzen?
+- [ ] Dann mach nicht damit rum wie mit einem Staubwedel.
+- [ ] Aha, du warst also beim letzten Familientreffen.
+- [ ] Du kannst SO schnell davon laufen?
+
+### "Trägst du immer noch Windeln?"
+- [x] Wieso, die könntest DU viel eher gebrauchen!
+- [ ] Doch, doch, du hast sie nur nie gelernt.
+- [ ] Wie passend. Du kämpfst wie eine Kuh.
+- [ ] Hattest du das nicht vor kurzem getan?
+
+### "Meine Narbe im Gesicht stammt aus einem harten Kampf!"
+- [x] Aha, mal wieder in der Nase gebohrt, wie?
+- [ ] Zu schade, dass DICH überhaupt niemand kennt.
+- [ ] Er muß dir das Fechten beigebracht haben.
+- [ ] Willst du mich mit deinem Geschwafel ermüden?
 
 ---
 
