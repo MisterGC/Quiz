@@ -68,7 +68,7 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.game.musicStarted = true
+                        onClicked: root.game.startMusic()
                     }
                 }
 

@@ -1,16 +1,23 @@
 import QtQuick
+import Clayground.Common
+import Clayground.Network
 import "QuizParser.js" as QuizParser
-
-// TODO: Replace shared properties with clay_network P2P
-// Currently all three views share state via direct property bindings.
-// For a real multi-device setup, the game state would be synced over
-// the network using Clayground's clay_network plugin.
 
 Item {
     id: root
     signal pointRevealStarted()
 
-    // --- Quiz content (parsed from questions.md) ---
+    // ======= Role & Networking =======
+    readonly property string role: Clayground.dojoArgs["role"] || "standalone"
+    readonly property bool isNetworked: role !== "standalone"
+    readonly property bool isHost: role === "presentation"
+    readonly property bool isClient: isNetworked && !isHost
+
+    property string sessionCode: Clayground.dojoArgs["session"] || ""
+    property var connectedRoles: ({})
+    property bool networkReady: false
+
+    // ======= Quiz content (parsed from questions.md) =======
     property var quizData: null
     readonly property string quizTitlePrefix: quizData ? quizData.titlePrefix : ""
     readonly property string quizTitleName: quizData ? quizData.titleName : ""
@@ -18,7 +25,13 @@ Item {
     readonly property string quizTitleMusic: quizData ? quizData.titleMusic : ""
     readonly property var rounds: quizData ? quizData.rounds : []
 
-    Component.onCompleted: _loadQuiz()
+    Component.onCompleted: {
+        _loadQuiz();
+        if (isHost)
+            network.host();
+        else if (isClient && sessionCode)
+            network.join(sessionCode);
+    }
 
     function _loadQuiz() {
         var xhr = new XMLHttpRequest();
@@ -34,7 +47,7 @@ Item {
         xhr.send();
     }
 
-    // --- Game state ---
+    // ======= Game state =======
     property bool musicStarted: false
     // Phases: title|roundIntro|question|reveal|scoreboard|finale
     //         |singingActive|singingReveal
@@ -80,7 +93,7 @@ Item {
     property bool player2Correct: false
     property int player2PointsEarned: 0
 
-    // --- Derived ---
+    // ======= Derived =======
     readonly property int totalRounds: rounds.length
     readonly property var currentRoundData: (currentRound >= 0 && currentRound < totalRounds)
                                             ? rounds[currentRound] : null
@@ -98,24 +111,275 @@ Item {
         return total;
     }
 
-    // --- State machine ---
+    // ======= Network =======
+    Network {
+        id: network
+        maxNodes: 4
+        topology: Network.Topology.Star
+        autoRelay: false
+
+        onNetworkCreated: (code) => {
+            root.sessionCode = code;
+        }
+        onNodeJoined: (nodeId) => {
+            network.sendTo(nodeId, {
+                action: "fullState",
+                state: root._serializeState()
+            });
+        }
+        onNodeLeft: (nodeId) => {
+            var roles = root.connectedRoles;
+            for (var r in roles) {
+                if (roles[r] === nodeId) {
+                    delete roles[r];
+                    root.connectedRoles = roles;
+                    root._broadcastGameState();
+                    break;
+                }
+            }
+        }
+        onMessageReceived: (fromId, data) => {
+            if (root.isHost)
+                root._handleCommand(fromId, data);
+            else
+                root._handleHostMessage(data);
+        }
+        onStateReceived: (fromId, data) => {
+            if (root.isClient)
+                root._applyState(data);
+        }
+    }
+
+    // Register role after connecting (client)
+    Connections {
+        target: network
+        function onConnectedChanged() {
+            if (root.isClient && network.connected)
+                network.broadcast({action: "register", role: root.role});
+        }
+    }
+
+    // Periodic state broadcast (host)
+    Timer {
+        interval: 200
+        running: root.isHost && network.connected
+        repeat: true
+        onTriggered: root._broadcastGameState()
+    }
+
+    // Reconnection timer (client)
+    Timer {
+        interval: 3000
+        running: root.isClient && !network.connected
+                 && root.sessionCode !== ""
+        repeat: true
+        onTriggered: network.join(root.sessionCode)
+    }
+
+    // ======= Network helpers =======
+    function _serializeState() {
+        return {
+            phase: phase,
+            musicStarted: musicStarted,
+            currentRound: currentRound,
+            currentQuestion: currentQuestion,
+            answersRevealed: answersRevealed,
+            timerValue: timerValue,
+            timerMax: timerMax,
+            timerRunning: timerRunning,
+            lastRoast: lastRoast,
+            player1Answer: player1Answer,
+            player1Locked: player1Locked,
+            player1Score: player1Score,
+            player1Correct: player1Correct,
+            player1PointsEarned: player1PointsEarned,
+            player2Answer: player2Answer,
+            player2Locked: player2Locked,
+            player2Score: player2Score,
+            player2Correct: player2Correct,
+            player2PointsEarned: player2PointsEarned,
+            singingTimerStarted: singingTimerStarted,
+            scenarioSolved: scenarioSolved,
+            plankBasti: plankBasti,
+            plankCrowd: plankCrowd,
+            duelTurn: duelTurn,
+            duelMaxTurns: duelMaxTurns,
+            plankShrunk: plankShrunk,
+            insultChoices: insultChoices,
+            chosenInsultIdx: chosenInsultIdx,
+            duelWinner: duelWinner,
+            connectedRoles: connectedRoles
+        };
+    }
+
+    function _applyState(s) {
+        if (s.phase !== undefined) phase = s.phase;
+        if (s.musicStarted !== undefined) musicStarted = s.musicStarted;
+        if (s.currentRound !== undefined) currentRound = s.currentRound;
+        if (s.currentQuestion !== undefined) currentQuestion = s.currentQuestion;
+        if (s.answersRevealed !== undefined) answersRevealed = s.answersRevealed;
+        if (s.timerValue !== undefined) timerValue = s.timerValue;
+        if (s.timerMax !== undefined) timerMax = s.timerMax;
+        if (s.timerRunning !== undefined) timerRunning = s.timerRunning;
+        if (s.lastRoast !== undefined) lastRoast = s.lastRoast;
+        if (s.player1Answer !== undefined) player1Answer = s.player1Answer;
+        if (s.player1Locked !== undefined) player1Locked = s.player1Locked;
+        if (s.player1Score !== undefined) player1Score = s.player1Score;
+        if (s.player1Correct !== undefined) player1Correct = s.player1Correct;
+        if (s.player1PointsEarned !== undefined) player1PointsEarned = s.player1PointsEarned;
+        if (s.player2Answer !== undefined) player2Answer = s.player2Answer;
+        if (s.player2Locked !== undefined) player2Locked = s.player2Locked;
+        if (s.player2Score !== undefined) player2Score = s.player2Score;
+        if (s.player2Correct !== undefined) player2Correct = s.player2Correct;
+        if (s.player2PointsEarned !== undefined) player2PointsEarned = s.player2PointsEarned;
+        if (s.singingTimerStarted !== undefined) singingTimerStarted = s.singingTimerStarted;
+        if (s.scenarioSolved !== undefined) scenarioSolved = s.scenarioSolved;
+        if (s.plankBasti !== undefined) plankBasti = s.plankBasti;
+        if (s.plankCrowd !== undefined) plankCrowd = s.plankCrowd;
+        if (s.duelTurn !== undefined) duelTurn = s.duelTurn;
+        if (s.duelMaxTurns !== undefined) duelMaxTurns = s.duelMaxTurns;
+        if (s.plankShrunk !== undefined) plankShrunk = s.plankShrunk;
+        if (s.insultChoices !== undefined) insultChoices = s.insultChoices;
+        if (s.chosenInsultIdx !== undefined) chosenInsultIdx = s.chosenInsultIdx;
+        if (s.duelWinner !== undefined) duelWinner = s.duelWinner;
+        if (s.connectedRoles !== undefined) connectedRoles = s.connectedRoles;
+        // Recompute currentDuelData from synced indices
+        if (chosenInsultIdx >= 0 && currentRoundData) {
+            var qs = currentRoundData.questions;
+            currentDuelData = (chosenInsultIdx < qs.length)
+                              ? qs[chosenInsultIdx] : null;
+        } else {
+            currentDuelData = null;
+        }
+        networkReady = true;
+    }
+
+    function _sendCommand(cmd) {
+        if (network.connected)
+            network.broadcast(cmd);
+    }
+
+    function _handleCommand(fromId, cmd) {
+        var senderRole = _roleForNode(fromId);
+        switch (cmd.action) {
+        case "register":
+            var roles = connectedRoles;
+            roles[cmd.role] = fromId;
+            connectedRoles = roles;
+            network.sendTo(fromId, {
+                action: "fullState",
+                state: _serializeState()
+            });
+            _broadcastGameState();
+            break;
+        case "startMusic":
+            if (senderRole === "mod") startMusic();
+            break;
+        case "startGame":
+            if (senderRole === "mod") startGame();
+            break;
+        case "jumpToRound":
+            if (senderRole === "mod") jumpToRound(cmd.index);
+            break;
+        case "startRound":
+            if (senderRole === "mod") startRound();
+            break;
+        case "showAnswers":
+            if (senderRole === "mod") showAnswers();
+            break;
+        case "revealAnswer":
+            if (senderRole === "mod") revealAnswer();
+            break;
+        case "nextStep":
+            if (senderRole === "mod") nextStep();
+            break;
+        case "advanceFromScoreboard":
+            if (senderRole === "mod") advanceFromScoreboard();
+            break;
+        case "restartGame":
+            if (senderRole === "mod") restartGame();
+            break;
+        case "submitAnswer":
+            if ((senderRole === "basti" && cmd.playerIndex === 0)
+                || (senderRole === "dacrowd" && cmd.playerIndex === 1))
+                submitAnswer(cmd.playerIndex, cmd.answerIndex);
+            break;
+        case "submitInsultChoice":
+            if (senderRole === "dacrowd") submitInsultChoice(cmd.choiceIdx);
+            break;
+        case "submitDuelCounter":
+            if (senderRole === "basti") submitDuelCounter(cmd.answerIdx);
+            break;
+        case "startSongTimer":
+            if (senderRole === "mod") startSongTimer();
+            break;
+        case "awardSingingPoints":
+            if (senderRole === "mod") awardSingingPoints(cmd.p1Points, cmd.p2Points);
+            break;
+        case "nextSong":
+            if (senderRole === "mod") nextSong();
+            break;
+        case "startConsoleTimer":
+            if (senderRole === "mod") startConsoleTimer();
+            break;
+        case "resolveConsole":
+            if (senderRole === "mod") resolveConsole(cmd.success);
+            break;
+        case "nextConsoleStep":
+            if (senderRole === "mod") nextConsoleStep();
+            break;
+        case "nextDuelStep":
+            if (senderRole === "mod") nextDuelStep();
+            break;
+        }
+    }
+
+    function _handleHostMessage(data) {
+        if (data.action === "fullState")
+            _applyState(data.state);
+    }
+
+    function _roleForNode(nodeId) {
+        for (var r in connectedRoles) {
+            if (connectedRoles[r] === nodeId) return r;
+        }
+        return "";
+    }
+
+    function _broadcastGameState() {
+        if (isHost && network.connected)
+            network.broadcastState(_serializeState());
+    }
+
+    // ======= State machine =======
+    function startMusic() {
+        if (isClient) { _sendCommand({action: "startMusic"}); return; }
+        musicStarted = true;
+        _broadcastGameState();
+    }
+
     function startGame() {
+        if (isClient) { _sendCommand({action: "startGame"}); return; }
         currentRound = 0;
         player1Score = 0;
         player2Score = 0;
         phase = "roundIntro";
+        _broadcastGameState();
     }
 
     function jumpToRound(index) {
+        if (isClient) { _sendCommand({action: "jumpToRound", index: index}); return; }
         if (index < 0 || index >= totalRounds) return;
         currentRound = index;
         currentQuestion = 0;
         player1Score = 0;
         player2Score = 0;
         phase = "roundIntro";
+        _broadcastGameState();
     }
 
     function startRound() {
+        if (isClient) { _sendCommand({action: "startRound"}); return; }
         currentQuestion = 0;
         switch (currentMode) {
         case "singing":
@@ -131,6 +395,7 @@ Item {
             _showQuestion();
             break;
         }
+        _broadcastGameState();
     }
 
     function _showQuestion() {
@@ -150,11 +415,21 @@ Item {
     }
 
     function showAnswers() {
+        if (isClient) { _sendCommand({action: "showAnswers"}); return; }
         answersRevealed = true;
         timerRunning = true;
+        _broadcastGameState();
     }
 
     function submitAnswer(playerIndex, answerIndex) {
+        if (isClient) {
+            _sendCommand({
+                action: "submitAnswer",
+                playerIndex: playerIndex,
+                answerIndex: answerIndex
+            });
+            return;
+        }
         if (!answersRevealed || phase !== "question") return;
         if (!timerRunning && timerValue <= 0) return;
 
@@ -168,9 +443,11 @@ Item {
 
         if (player1Locked && player2Locked)
             timerRunning = false;
+        _broadcastGameState();
     }
 
     function revealAnswer() {
+        if (isClient) { _sendCommand({action: "revealAnswer"}); return; }
         if (phase !== "question") return;
         timerRunning = false;
 
@@ -178,7 +455,6 @@ Item {
         if (!q) return;
 
         if (currentMode === "taste") {
-            // Taste mode: match = both chose the same option
             var match = (player1Answer >= 0 && player1Answer === player2Answer);
             player1Correct = match;
             player2Correct = match;
@@ -186,7 +462,6 @@ Item {
             player2PointsEarned = match ? 100 : 0;
             lastRoast = "";
         } else {
-            // Standard quiz scoring
             player1Correct = (player1Answer === q.correct);
             if (player1Correct) {
                 var tb1 = Math.floor(timerValue / timerMax * 50);
@@ -208,6 +483,7 @@ Item {
 
         phase = "reveal";
         pointRevealStarted();
+        _broadcastGameState();
     }
 
     function awardPoints(playerIndex) {
@@ -215,6 +491,7 @@ Item {
             player1Score += player1PointsEarned;
         else if (playerIndex === 1)
             player2Score += player2PointsEarned;
+        _broadcastGameState();
     }
 
     // --- Singing mode ---
@@ -232,11 +509,21 @@ Item {
     }
 
     function startSongTimer() {
+        if (isClient) { _sendCommand({action: "startSongTimer"}); return; }
         singingTimerStarted = true;
         timerRunning = true;
+        _broadcastGameState();
     }
 
     function awardSingingPoints(p1Points, p2Points) {
+        if (isClient) {
+            _sendCommand({
+                action: "awardSingingPoints",
+                p1Points: p1Points,
+                p2Points: p2Points
+            });
+            return;
+        }
         player1PointsEarned = p1Points;
         player2PointsEarned = p2Points;
         player1Correct = p1Points > 0;
@@ -245,9 +532,11 @@ Item {
         player2Score += p2Points;
         timerRunning = false;
         phase = "singingReveal";
+        _broadcastGameState();
     }
 
     function nextSong() {
+        if (isClient) { _sendCommand({action: "nextSong"}); return; }
         var qs = currentRoundData ? currentRoundData.questions : [];
         if (currentQuestion + 1 < qs.length) {
             currentQuestion++;
@@ -255,11 +544,10 @@ Item {
         } else {
             phase = "scoreboard";
         }
+        _broadcastGameState();
     }
 
     // --- Console mode ---
-    // The actual DOS terminal runs in a separate browser window
-    // (dos/index.html). This just manages timer and scoring.
     function _startConsoleScenario() {
         var q = currentQuestionData;
         scenarioSolved = false;
@@ -272,10 +560,13 @@ Item {
     }
 
     function startConsoleTimer() {
+        if (isClient) { _sendCommand({action: "startConsoleTimer"}); return; }
         timerRunning = true;
+        _broadcastGameState();
     }
 
     function resolveConsole(success) {
+        if (isClient) { _sendCommand({action: "resolveConsole", success: success}); return; }
         timerRunning = false;
         if (success) {
             player1PointsEarned = 100;
@@ -286,10 +577,13 @@ Item {
             player1Correct = false;
         }
         phase = "consoleResult";
+        _broadcastGameState();
     }
 
     function nextConsoleStep() {
+        if (isClient) { _sendCommand({action: "nextConsoleStep"}); return; }
         phase = "scoreboard";
+        _broadcastGameState();
     }
 
     // --- Plank-duel mode ---
@@ -302,13 +596,13 @@ Item {
             duelWinner = "";
         }
 
-        // Pick 3 unused insults for crowd to choose from
+        // Pick unused insults for crowd to choose from
         var qs = currentRoundData ? currentRoundData.questions : [];
         var available = [];
         for (var i = 0; i < qs.length; i++) {
             if (usedInsults.indexOf(i) < 0) available.push(i);
         }
-        // Shuffle and take 3
+        // Shuffle and take up to 4
         for (var j = available.length - 1; j > 0; j--) {
             var k = Math.floor(Math.random() * (j + 1));
             var tmp = available[j];
@@ -327,6 +621,7 @@ Item {
     }
 
     function submitInsultChoice(choiceIdx) {
+        if (isClient) { _sendCommand({action: "submitInsultChoice", choiceIdx: choiceIdx}); return; }
         if (phase !== "duelPick") return;
         chosenInsultIdx = choiceIdx;
         player2Locked = true;
@@ -343,14 +638,17 @@ Item {
         timerRunning = true;
         answersRevealed = true;
         phase = "duelCounter";
+        _broadcastGameState();
     }
 
     function submitDuelCounter(answerIdx) {
+        if (isClient) { _sendCommand({action: "submitDuelCounter", answerIdx: answerIdx}); return; }
         if (phase !== "duelCounter") return;
         player1Answer = answerIdx;
         player1Locked = true;
         timerRunning = false;
         _revealDuelResult();
+        _broadcastGameState();
     }
 
     function _revealDuelResult() {
@@ -381,10 +679,10 @@ Item {
     }
 
     function nextDuelStep() {
+        if (isClient) { _sendCommand({action: "nextDuelStep"}); return; }
         if (phase !== "duelResult") return;
 
         if (duelWinner !== "") {
-            // Award points and go to scoreboard
             if (duelWinner === "basti") {
                 player1Score += 200;
                 player1PointsEarned = 200;
@@ -395,10 +693,10 @@ Item {
                 player2PointsEarned = 200;
             }
             phase = "scoreboard";
+            _broadcastGameState();
             return;
         }
 
-        // Check if enough insults remain
         var qs = currentRoundData ? currentRoundData.questions : [];
         var remaining = 0;
         for (var i = 0; i < qs.length; i++) {
@@ -408,7 +706,6 @@ Item {
         if (remaining > 0) {
             _startDuelTurn();
         } else {
-            // No more insults, decide by position
             if (plankBasti > plankCrowd)
                 duelWinner = "crowd";
             else if (plankCrowd > plankBasti)
@@ -432,9 +729,11 @@ Item {
             }
             phase = "scoreboard";
         }
+        _broadcastGameState();
     }
 
     function nextStep() {
+        if (isClient) { _sendCommand({action: "nextStep"}); return; }
         if (phase !== "reveal") return;
 
         var qs = currentRoundData ? currentRoundData.questions : [];
@@ -444,9 +743,11 @@ Item {
         } else {
             phase = "scoreboard";
         }
+        _broadcastGameState();
     }
 
     function advanceFromScoreboard() {
+        if (isClient) { _sendCommand({action: "advanceFromScoreboard"}); return; }
         if (phase !== "scoreboard") return;
 
         if (currentRound + 1 < totalRounds) {
@@ -455,9 +756,11 @@ Item {
         } else {
             phase = "finale";
         }
+        _broadcastGameState();
     }
 
     function restartGame() {
+        if (isClient) { _sendCommand({action: "restartGame"}); return; }
         currentRound = 0;
         currentQuestion = 0;
         player1Answer = -1;
@@ -486,12 +789,13 @@ Item {
         duelWinner = "";
         scenarioSolved = false;
         phase = "title";
+        _broadcastGameState();
     }
 
-    // --- Timer ---
+    // --- Timer (only runs on host/standalone) ---
     Timer {
         interval: 100
-        running: root.timerRunning
+        running: root.timerRunning && !root.isClient
         repeat: true
         onTriggered: {
             if (root.timerValue > 0) {
@@ -502,49 +806,45 @@ Item {
         }
     }
 
-    // --- Layout ---
+    // ======= Layout =======
     Rectangle {
         anchors.fill: parent
         color: "#0d0d1a"
     }
 
+    // === Standalone: all views side by side ===
     Row {
         anchors.fill: parent
+        visible: !root.isNetworked
 
-        // Presentation (left 65%)
         PresentationView {
             width: parent.width * 0.65
             height: parent.height
             game: root
         }
 
-        // Vertical separator
         Rectangle {
             width: 2
             height: parent.height
             color: "#333355"
         }
 
-        // Right panel (35%)
         Column {
             width: parent.width * 0.35 - 2
             height: parent.height
 
-            // Moderator (top half)
             ModeratorView {
                 width: parent.width
                 height: parent.height * 0.5
                 game: root
             }
 
-            // Horizontal separator
             Rectangle {
                 width: parent.width
                 height: 2
                 color: "#333355"
             }
 
-            // Players (bottom half, side by side)
             Row {
                 width: parent.width
                 height: parent.height * 0.5 - 2
@@ -567,6 +867,167 @@ Item {
                     height: parent.height
                     game: root
                     playerIndex: 1
+                }
+            }
+        }
+    }
+
+    // === Networked: role-specific fullscreen view ===
+    Loader {
+        id: roleView
+        anchors.fill: parent
+        active: root.isNetworked
+
+        Component.onCompleted: {
+            if (!root.isNetworked) return;
+            switch (root.role) {
+            case "presentation":
+                setSource("PresentationView.qml", {game: root});
+                break;
+            case "mod":
+                setSource("ModeratorView.qml", {game: root});
+                break;
+            case "basti":
+                setSource("PlayerView.qml", {game: root, playerIndex: 0});
+                break;
+            case "dacrowd":
+                setSource("PlayerView.qml", {game: root, playerIndex: 1});
+                break;
+            }
+        }
+    }
+
+    // === Host: join code overlay (top-right corner) ===
+    Rectangle {
+        visible: root.isHost && root.sessionCode !== ""
+        anchors { top: parent.top; right: parent.right; margins: 12 }
+        width: codeCol.width + 24
+        height: codeCol.height + 16
+        radius: 8
+        color: "#cc1a1a2e"
+        border.color: "#ffcc00"
+        border.width: 1
+        z: 10
+
+        Column {
+            id: codeCol
+            anchors.centerIn: parent
+            spacing: 4
+
+            Text {
+                text: "CODE: " + root.sessionCode
+                color: "#ffcc00"
+                font { pixelSize: 18; bold: true; family: "monospace" }
+            }
+            Text {
+                text: {
+                    var parts = [];
+                    parts.push(root.connectedRoles["mod"]
+                               ? "Mod \u2713" : "Mod ...");
+                    parts.push(root.connectedRoles["basti"]
+                               ? "Basti \u2713" : "Basti ...");
+                    parts.push(root.connectedRoles["dacrowd"]
+                               ? "Crowd \u2713" : "Crowd ...");
+                    return parts.join("  ");
+                }
+                color: "#aaaacc"
+                font { pixelSize: 11; family: "monospace" }
+            }
+        }
+    }
+
+    // === Client: join screen (covers view until connected + synced) ===
+    Rectangle {
+        anchors.fill: parent
+        visible: root.isClient && !root.networkReady
+        color: "#0d0d1a"
+        z: 20
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 16
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: {
+                    switch (root.role) {
+                    case "mod": return "MODERATOR";
+                    case "basti": return "BASTI";
+                    case "dacrowd": return "DA CROWD";
+                    default: return root.role.toUpperCase();
+                    }
+                }
+                color: "#ffcc00"
+                font { pixelSize: 28; bold: true; family: "monospace" }
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: {
+                    if (network.status === Network.Status.Connecting)
+                        return "Verbinde...";
+                    if (network.connected)
+                        return "Verbunden! Warte auf Spielstand...";
+                    if (root.sessionCode !== "")
+                        return "Verbindung verloren \u2014 verbinde neu...";
+                    return "Spiel-Code eingeben:";
+                }
+                color: (root.sessionCode !== "" && !network.connected
+                        && network.status !== Network.Status.Connecting)
+                       ? "#ff6644" : "#aaaacc"
+                font { pixelSize: 14; family: "monospace" }
+            }
+
+            // Code input
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 220; height: 48
+                radius: 8
+                color: "#2a2a4e"
+                border.color: codeInput.activeFocus ? "#ffcc00" : "#555577"
+                border.width: 1
+                visible: !network.connected
+
+                TextInput {
+                    id: codeInput
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    color: "#ffffff"
+                    font { pixelSize: 22; bold: true; family: "monospace" }
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    inputMethodHints: Qt.ImhUppercaseOnly
+                    onAccepted: {
+                        if (text.length > 0) {
+                            root.sessionCode = text.toUpperCase();
+                            network.join(root.sessionCode);
+                        }
+                    }
+                }
+            }
+
+            // Connect button
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 180; height: 48; radius: 8
+                color: codeInput.text.length > 0 ? "#2a7a3a" : "#333355"
+                visible: !network.connected
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Verbinden"
+                    color: "#ffffff"
+                    font { pixelSize: 18; bold: true; family: "monospace" }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (codeInput.text.length > 0) {
+                            root.sessionCode = codeInput.text.toUpperCase();
+                            network.join(root.sessionCode);
+                        }
+                    }
                 }
             }
         }
