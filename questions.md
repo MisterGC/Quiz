@@ -16,6 +16,7 @@
 > Selbst Oddjob ist enttäuscht von dir.
 
 ### Wie lautete der Cheatcode bei 'Die Sims', um unbegrenzt Geld zu bekommen?
+
 - [ ] motherlode
 - [x] rosebud
 - [ ] kaching
@@ -42,6 +43,35 @@
 - [ ] Liero
 - [ ] Scorched Earth
 > Das sind keine Vögel, Genie. Das sind Wirbellose.
+
+---
+### Deep-Space-Night und du willst rein
+#### Du möchtest heute im Babylon auf der Deep-Space-Night tanzen, bist aber mit deinen 17 Jahren noch zu jung. Du leihst dir einen Führerschein eines volljährigen Freundes. Bereite dich auf Fragen des Türstehers vor.
+
+### "Wie heißst du?"
+- [ ] Basti Rampf
+- [ ] Hans Lüt
+- [x] Hannes Litt
+- [ ] Hannes Lit
+
+### "Wo bist du geboren?"
+- [ ] Starnberg
+- [x] Flensburg
+- [ ] München
+- [ ] Friedrichshafen
+
+### "Welches Sternzeichen hast du?"
+- [ ] Affe
+- [x] Zwilling
+- [ ] Fisch
+- [ ] Steinbock
+
+### "Fälscher-Bonus-Frage Was hast du verwendet, um den Dienststempel nachzuzeichnen? Folienstift und ..."
+- [ ] Flaschenverschluss
+- [x] Booster-Dose
+- [ ] 50-Pfennig Stück
+- [ ] Den Gummiball einer alten Maus
+
 
 ---
 
