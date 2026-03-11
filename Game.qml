@@ -14,6 +14,7 @@ Item {
     readonly property bool isClient: isNetworked && !isHost
 
     property string sessionCode: Clayground.dojoArgs["session"] || ""
+    property string signalingUrl: Clayground.dojoArgs["signaling"] || ""
     property var connectedRoles: ({})
     property bool networkReady: false
 
@@ -53,6 +54,7 @@ Item {
     //         |singingActive|singingReveal
     //         |duelPick|duelCounter|duelResult
     //         |console|consoleResult
+    //         |blitzReady|blitzPair|blitzReveal|blitzDone|blitzSummary|blitzSummaryDone
     property string phase: "title"
     property int currentRound: 0
     property int currentQuestion: 0
@@ -67,6 +69,15 @@ Item {
 
     // --- Console state ---
     property bool scenarioSolved: false
+
+    // --- Blitz state ---
+    property var blitzResults: []
+    readonly property int blitzMatchCount: {
+        var count = 0;
+        for (var i = 0; i < blitzResults.length; i++)
+            if (blitzResults[i].matched) count++;
+        return count;
+    }
 
     // --- Plank-duel state ---
     property int plankBasti: 0       // 0..4, at 4 = fallen off
@@ -117,6 +128,7 @@ Item {
         maxNodes: 4
         topology: Network.Topology.Star
         autoRelay: false
+        signalingUrl: root.signalingUrl
 
         onNetworkCreated: (code) => {
             root.sessionCode = code;
@@ -200,6 +212,7 @@ Item {
             player2PointsEarned: player2PointsEarned,
             singingTimerStarted: singingTimerStarted,
             scenarioSolved: scenarioSolved,
+            blitzResults: blitzResults,
             plankBasti: plankBasti,
             plankCrowd: plankCrowd,
             duelTurn: duelTurn,
@@ -234,6 +247,7 @@ Item {
         if (s.player2PointsEarned !== undefined) player2PointsEarned = s.player2PointsEarned;
         if (s.singingTimerStarted !== undefined) singingTimerStarted = s.singingTimerStarted;
         if (s.scenarioSolved !== undefined) scenarioSolved = s.scenarioSolved;
+        if (s.blitzResults !== undefined) blitzResults = s.blitzResults;
         if (s.plankBasti !== undefined) plankBasti = s.plankBasti;
         if (s.plankCrowd !== undefined) plankCrowd = s.plankCrowd;
         if (s.duelTurn !== undefined) duelTurn = s.duelTurn;
@@ -331,6 +345,15 @@ Item {
         case "nextDuelStep":
             if (senderRole === "mod") nextDuelStep();
             break;
+        case "startBlitz":
+            if (senderRole === "mod") startBlitz();
+            break;
+        case "startBlitzSummary":
+            if (senderRole === "mod") startBlitzSummary();
+            break;
+        case "advanceFromBlitzSummary":
+            if (senderRole === "mod") advanceFromBlitzSummary();
+            break;
         }
     }
 
@@ -391,6 +414,9 @@ Item {
         case "plank-duel":
             _startDuelTurn();
             break;
+        case "taste":
+            _startBlitz();
+            break;
         default:
             _showQuestion();
             break;
@@ -409,6 +435,14 @@ Item {
         player2PointsEarned = 0;
         answersRevealed = false;
         lastRoast = "";
+
+        if (currentMode === "taste") {
+            if (currentQuestion <= 2)      timerMax = 100;
+            else if (currentQuestion <= 5) timerMax = 70;
+            else if (currentQuestion === 6) timerMax = 50;
+            else                            timerMax = 30;
+        }
+
         timerValue = timerMax;
         timerRunning = false;
         phase = "question";
@@ -430,7 +464,7 @@ Item {
             });
             return;
         }
-        if (!answersRevealed || phase !== "question") return;
+        if (!answersRevealed || (phase !== "question" && phase !== "blitzPair")) return;
         if (!timerRunning && timerValue <= 0) return;
 
         if (playerIndex === 0 && !player1Locked) {
@@ -441,8 +475,12 @@ Item {
             player2Locked = true;
         }
 
-        if (player1Locked && player2Locked)
+        if (player1Locked && player2Locked) {
             timerRunning = false;
+            if (phase === "blitzPair") {
+                _blitzReveal();
+            }
+        }
         _broadcastGameState();
     }
 
@@ -732,6 +770,83 @@ Item {
         _broadcastGameState();
     }
 
+    // --- Blitz mode (taste round) ---
+    function _startBlitz() {
+        blitzResults = [];
+        currentQuestion = 0;
+        phase = "blitzReady";
+    }
+
+    function startBlitz() {
+        if (isClient) { _sendCommand({action: "startBlitz"}); return; }
+        _startBlitzPair();
+        _broadcastGameState();
+    }
+
+    function _startBlitzPair() {
+        player1Answer = -1;
+        player2Answer = -1;
+        player1Locked = false;
+        player2Locked = false;
+        answersRevealed = true;
+        timerMax = 50;
+        timerValue = timerMax;
+        timerRunning = true;
+        phase = "blitzPair";
+    }
+
+    function _blitzReveal() {
+        timerRunning = false;
+        var matched = (player1Answer >= 0 && player1Answer === player2Answer);
+        var qs = currentRoundData ? currentRoundData.questions : [];
+        var pairData = (currentQuestion >= 0 && currentQuestion < qs.length)
+                       ? qs[currentQuestion] : null;
+        var results = blitzResults.slice();
+        results.push({
+            bastiAnswer: player1Answer,
+            crowdAnswer: player2Answer,
+            matched: matched,
+            pairText: pairData ? pairData.text : "",
+            answers: pairData ? pairData.answers : []
+        });
+        blitzResults = results;
+        phase = "blitzReveal";
+        timerMax = 20;
+        timerValue = timerMax;
+        timerRunning = true;
+    }
+
+    function _blitzAdvance() {
+        timerRunning = false;
+        var qs = currentRoundData ? currentRoundData.questions : [];
+        if (currentQuestion + 1 < qs.length) {
+            currentQuestion++;
+            _startBlitzPair();
+        } else {
+            phase = "blitzDone";
+        }
+    }
+
+    function startBlitzSummary() {
+        if (isClient) { _sendCommand({action: "startBlitzSummary"}); return; }
+        phase = "blitzSummary";
+        timerMax = blitzResults.length * 30 + 20;
+        timerValue = timerMax;
+        timerRunning = true;
+        _broadcastGameState();
+    }
+
+    function advanceFromBlitzSummary() {
+        if (isClient) { _sendCommand({action: "advanceFromBlitzSummary"}); return; }
+        var points = blitzMatchCount * 50;
+        player1Score += points;
+        player2Score += points;
+        player1PointsEarned = points;
+        player2PointsEarned = points;
+        phase = "scoreboard";
+        _broadcastGameState();
+    }
+
     function nextStep() {
         if (isClient) { _sendCommand({action: "nextStep"}); return; }
         if (phase !== "reveal") return;
@@ -788,6 +903,7 @@ Item {
         currentDuelData = null;
         duelWinner = "";
         scenarioSolved = false;
+        blitzResults = [];
         phase = "title";
         _broadcastGameState();
     }
@@ -802,6 +918,16 @@ Item {
                 root.timerValue--;
             } else {
                 root.timerRunning = false;
+                if (root.phase === "blitzPair") {
+                    root._blitzReveal();
+                    root._broadcastGameState();
+                } else if (root.phase === "blitzReveal") {
+                    root._blitzAdvance();
+                    root._broadcastGameState();
+                } else if (root.phase === "blitzSummary") {
+                    root.phase = "blitzSummaryDone";
+                    root._broadcastGameState();
+                }
             }
         }
     }

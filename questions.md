@@ -175,25 +175,21 @@
 > Sponsor: Gesponsert von Dr. Oetker Pizza — Weil selbst kochen Zeitverschwendung ist!
 > Type: taste
 
-### Tee oder Kaffee?
-- Tee
-- Kaffee
+### Mit dem U-Boot zur Titanic — oder — Mit der Rakete zum Mond
+- Mit dem U-Boot zur Titanic
+- Mit der Rakete zum Mond
 
-### Star Wars oder Star Trek?
-- Star Wars
-- Star Trek
+### Anakonda in der Badewanne — oder — Vogelspinne auf dem Tisch
+- Anakonda in der Badewanne
+- Vogelspinne auf dem Tisch
 
-### Konsole oder PC?
-- Konsole
-- PC
+### Bär im Aufzug — oder — Hai im Schwimmbad
+- Bär im Aufzug
+- Hai im Schwimmbad
 
-### Sommer oder Winter?
-- Sommer
-- Winter
-
-### Pizza Hawaii — ja oder nein?
-- Ja, Ananas gehört drauf
-- Nein, niemals
+### Mit Känguru boxen — oder — Mit Pinguin tanzen
+- Mit Känguru boxen
+- Mit Pinguin tanzen
 
 ---
 
@@ -202,14 +198,14 @@
 > Sponsor: Gesponsert von Shazam — Hilft leider nicht bei live Gesang!
 > Type: singing
 
-### Eye of the Tiger
-> Artist: Survivor
+### Macarena
+> Artist: Los del Rio
 > Timer: 200
 
-### Take On Me
-> Artist: a-ha
+### Wannabe
+> Artist: Spice Girls
 > Timer: 200
 
-### Livin' on a Prayer
-> Artist: Bon Jovi
+### My Name Is
+> Artist: Eminem
 > Timer: 200

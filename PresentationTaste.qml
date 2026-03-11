@@ -4,221 +4,404 @@ Item {
     id: root
 
     property QtObject game: null
-    property var correctSound: null
-    property var wrongSound: null
 
     readonly property color gold: "#ffcc00"
     readonly property color colCorrect: "#00e676"
     readonly property color colWrong: "#ff1744"
+    readonly property color colTimeout: "#ff9800"
     readonly property color colA: "#2a4a8a"
     readonly property color colD: "#8a2a3a"
 
     property var qData: root.game.currentQuestionData
-    property bool isReveal: root.game.phase === "reveal"
     property real displayScore1: root.game.player1Score
     property real displayScore2: root.game.player2Score
+
+    readonly property int totalPairs: game && game.currentRoundData
+                                      ? game.currentRoundData.questions.length : 0
 
     Behavior on displayScore1 { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
     Behavior on displayScore2 { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
 
-    // Countdown (upper-left)
+    // ====== blitzReady: "BEREIT?" screen ======
     Text {
-        x: 20; y: 15
-        rotation: -8
-        text: {
-            var s = Math.ceil(root.game.timerValue / 10);
-            return s < 10 ? "0" + s : s.toString();
-        }
-        visible: root.game.phase === "question"
-        opacity: root.game.timerRunning ? 1 : 0
+        anchors.centerIn: parent
+        visible: root.game.phase === "blitzReady"
+        text: "BEREIT?"
+        color: root.gold
+        font { pixelSize: 72; bold: true; family: "monospace" }
+        opacity: root.game.phase === "blitzReady" ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 400 } }
-        color: {
-            var secs = root.game.timerValue / 10.0;
-            if (secs > 7) return root.colCorrect;
-            if (secs > 3) return root.gold;
-            return root.colWrong;
-        }
-        Behavior on color { ColorAnimation { duration: 500 } }
-        font { pixelSize: 48; bold: true; family: "monospace" }
     }
 
-    // Question text at top
-    Text {
-        id: questionText
-        width: parent.width - 60
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        y: 20
-        text: root.qData ? root.qData.text : ""
-        color: "#ffffff"
-        wrapMode: Text.WordWrap
-        font { pixelSize: 26; bold: true; family: "monospace" }
-    }
+    // ====== blitzPair: Two cards + VS + countdown ======
+    Item {
+        anchors.fill: parent
+        visible: root.game.phase === "blitzPair"
 
-    // Two large cards side by side
-    Row {
-        id: cardRow
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: parent.height * 0.25
-        spacing: 0
-        visible: root.game.answersRevealed || root.isReveal
+        // Pair counter
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 12
+            text: (root.game.currentQuestion + 1) + "/" + root.totalPairs
+            color: root.gold
+            font { pixelSize: 24; bold: true; family: "monospace" }
+        }
 
-        opacity: (root.game.answersRevealed || root.isReveal) ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 400 } }
-
-        // Option A
-        Rectangle {
-            width: root.width * 0.38
-            height: root.height * 0.4
-            radius: 12
+        // Countdown
+        Text {
+            x: 20; y: 12
+            text: {
+                var s = Math.ceil(root.game.timerValue / 10);
+                return s < 10 ? "0" + s : s.toString();
+            }
             color: {
-                if (!root.isReveal) return "#2a3a5a";
-                if (root.game.player1Correct) return "#1a3a1a";
-                return "#3a1a1a";
+                var secs = root.game.timerValue / 10.0;
+                if (secs > 3) return root.gold;
+                return root.colWrong;
             }
-            border.width: root.isReveal && root.game.player1Answer === 0 ? 3 : 1
-            border.color: {
-                if (root.isReveal && root.game.player1Answer === 0) return root.colA;
-                if (root.isReveal && root.game.player2Answer === 0) return root.colD;
-                return "#333355";
-            }
-            Behavior on color { ColorAnimation { duration: 400 } }
-            Behavior on border.color { ColorAnimation { duration: 400 } }
+            Behavior on color { ColorAnimation { duration: 500 } }
+            font { pixelSize: 36; bold: true; family: "monospace" }
+        }
 
-            Column {
-                anchors.centerIn: parent
-                spacing: 12
+        // Two large cards
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: parent.height * 0.18
+            spacing: 0
+
+            // Option A
+            Rectangle {
+                width: root.width * 0.38
+                height: root.height * 0.45
+                radius: 12
+                color: "#2a3a5a"
+                border.width: root.game.player1Locked
+                              && root.game.player1Answer === 0 ? 3 : 1
+                border.color: root.game.player1Locked
+                              && root.game.player1Answer === 0
+                              ? root.colA : "#333355"
+                Behavior on border.color { ColorAnimation { duration: 300 } }
+
+                Column {
+                    anchors.centerIn: parent
+                    spacing: 8
+                    width: parent.width - 24
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: parent.width
+                        text: root.qData && root.qData.answers.length > 0
+                              ? root.qData.answers[0] : ""
+                        color: "#ffffff"
+                        font { pixelSize: 26; bold: true; family: "monospace" }
+                        wrapMode: Text.WordWrap
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
+                    // Lock indicators
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 6
+
+                        Rectangle {
+                            width: 32; height: 20; radius: 4
+                            color: root.colA
+                            visible: root.game.player1Locked
+                                     && root.game.player1Answer === 0
+                            Text {
+                                anchors.centerIn: parent
+                                text: "S1"; color: "#fff"
+                                font { pixelSize: 10; bold: true; family: "monospace" }
+                            }
+                        }
+                        Rectangle {
+                            width: 32; height: 20; radius: 4
+                            color: root.colD
+                            visible: root.game.player2Locked
+                                     && root.game.player2Answer === 0
+                            Text {
+                                anchors.centerIn: parent
+                                text: "S2"; color: "#fff"
+                                font { pixelSize: 10; bold: true; family: "monospace" }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // VS separator
+            Item {
+                width: root.width * 0.08
+                height: root.height * 0.45
 
                 Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.qData && root.qData.answers.length > 0
-                          ? root.qData.answers[0] : ""
-                    color: "#ffffff"
-                    font { pixelSize: 28; bold: true; family: "monospace" }
+                    anchors.centerIn: parent
+                    text: "VS"
+                    color: root.gold
+                    font { pixelSize: 32; bold: true; family: "monospace" }
+                    opacity: 0.8
                 }
+            }
 
-                // Show who chose this on reveal
-                Row {
-                    anchors.horizontalCenter: parent.horizontalCenter
+            // Option B
+            Rectangle {
+                width: root.width * 0.38
+                height: root.height * 0.45
+                radius: 12
+                color: "#2a3a5a"
+                border.width: root.game.player1Locked
+                              && root.game.player1Answer === 1 ? 3 : 1
+                border.color: root.game.player1Locked
+                              && root.game.player1Answer === 1
+                              ? root.colA : "#333355"
+                Behavior on border.color { ColorAnimation { duration: 300 } }
+
+                Column {
+                    anchors.centerIn: parent
                     spacing: 8
-                    visible: root.isReveal
+                    width: parent.width - 24
 
-                    Rectangle {
-                        width: 36; height: 22; radius: 4
-                        color: root.colA
-                        visible: root.game.player1Answer === 0
-                        Text {
-                            anchors.centerIn: parent
-                            text: "S1"
-                            color: "#ffffff"
-                            font { pixelSize: 11; bold: true; family: "monospace" }
-                        }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: parent.width
+                        text: root.qData && root.qData.answers.length > 1
+                              ? root.qData.answers[1] : ""
+                        color: "#ffffff"
+                        font { pixelSize: 26; bold: true; family: "monospace" }
+                        wrapMode: Text.WordWrap
+                        horizontalAlignment: Text.AlignHCenter
                     }
-                    Rectangle {
-                        width: 36; height: 22; radius: 4
-                        color: root.colD
-                        visible: root.game.player2Answer === 0
-                        Text {
-                            anchors.centerIn: parent
-                            text: "S2"
-                            color: "#ffffff"
-                            font { pixelSize: 11; bold: true; family: "monospace" }
+
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 6
+
+                        Rectangle {
+                            width: 32; height: 20; radius: 4
+                            color: root.colA
+                            visible: root.game.player1Locked
+                                     && root.game.player1Answer === 1
+                            Text {
+                                anchors.centerIn: parent
+                                text: "S1"; color: "#fff"
+                                font { pixelSize: 10; bold: true; family: "monospace" }
+                            }
+                        }
+                        Rectangle {
+                            width: 32; height: 20; radius: 4
+                            color: root.colD
+                            visible: root.game.player2Locked
+                                     && root.game.player2Answer === 1
+                            Text {
+                                anchors.centerIn: parent
+                                text: "S2"; color: "#fff"
+                                font { pixelSize: 10; bold: true; family: "monospace" }
+                            }
                         }
                     }
                 }
             }
         }
+    }
 
-        // VS separator
-        Item {
-            width: root.width * 0.08
-            height: root.height * 0.4
+    // ====== blitzReveal: Big JUBEL / OHHHH / ZU LANGSAM ======
+    Item {
+        anchors.fill: parent
+        visible: root.game.phase === "blitzReveal"
+
+        Text {
+            id: revealText
+            anchors.centerIn: parent
+            text: {
+                var r = root.game.blitzResults;
+                if (r.length === 0) return "";
+                var last = r[r.length - 1];
+                if (last.bastiAnswer < 0 || last.crowdAnswer < 0)
+                    return "ZU LANGSAM";
+                return last.matched ? "JUBEL!" : "OHHHH";
+            }
+            color: {
+                var r = root.game.blitzResults;
+                if (r.length === 0) return "#ffffff";
+                var last = r[r.length - 1];
+                if (last.bastiAnswer < 0 || last.crowdAnswer < 0)
+                    return root.colTimeout;
+                return last.matched ? root.colCorrect : root.colWrong;
+            }
+            font { pixelSize: 80; bold: true; family: "monospace" }
+
+            scale: revealScale.running ? 1.0 : 0.5
+            opacity: root.game.phase === "blitzReveal" ? 1 : 0
+        }
+
+        SequentialAnimation {
+            id: revealScale
+            running: root.game.phase === "blitzReveal"
+            loops: 1
+
+            NumberAnimation {
+                target: revealText; property: "scale"
+                from: 0.3; to: 1.2; duration: 200
+                easing.type: Easing.OutBack
+            }
+            NumberAnimation {
+                target: revealText; property: "scale"
+                from: 1.2; to: 1.0; duration: 150
+            }
+        }
+    }
+
+    // ====== blitzDone: Pause screen ======
+    Column {
+        anchors.centerIn: parent
+        spacing: 12
+        visible: root.game.phase === "blitzDone"
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "GESCHMACKS-BLITZ"
+            color: root.gold
+            font { pixelSize: 40; bold: true; family: "monospace" }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: root.game.blitzMatchCount + "/" + root.totalPairs
+                  + " \u00dcBEREINSTIMMUNGEN"
+            color: "#cccccc"
+            font { pixelSize: 28; family: "monospace" }
+        }
+    }
+
+    // ====== blitzSummary / blitzSummaryDone: Scrolling recap ======
+    Item {
+        anchors.fill: parent
+        visible: root.game.phase === "blitzSummary"
+                 || root.game.phase === "blitzSummaryDone"
+        clip: true
+
+        // Fixed header
+        Rectangle {
+            id: summaryHeader
+            width: parent.width
+            height: 60
+            color: "#0d0d1a"
+            z: 2
 
             Text {
                 anchors.centerIn: parent
-                text: "VS"
+                text: root.game.blitzMatchCount + "/" + root.totalPairs
+                      + " \u00dcBEREINSTIMMUNGEN"
                 color: root.gold
-                font { pixelSize: 32; bold: true; family: "monospace" }
-                opacity: 0.8
+                font { pixelSize: 28; bold: true; family: "monospace" }
             }
         }
 
-        // Option B
-        Rectangle {
-            width: root.width * 0.38
-            height: root.height * 0.4
-            radius: 12
-            color: {
-                if (!root.isReveal) return "#2a3a5a";
-                if (root.game.player1Correct) return "#1a3a1a";
-                return "#3a1a1a";
-            }
-            border.width: root.isReveal && root.game.player1Answer === 1 ? 3 : 1
-            border.color: {
-                if (root.isReveal && root.game.player1Answer === 1) return root.colA;
-                if (root.isReveal && root.game.player2Answer === 1) return root.colD;
-                return "#333355";
-            }
-            Behavior on color { ColorAnimation { duration: 400 } }
-            Behavior on border.color { ColorAnimation { duration: 400 } }
+        // Scrolling list
+        Flickable {
+            id: summaryFlick
+            anchors.top: summaryHeader.bottom
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 80
+            width: parent.width
+            contentHeight: summaryCol.height + 40
+            clip: true
 
             Column {
-                anchors.centerIn: parent
+                id: summaryCol
+                width: parent.width - 40
+                anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 12
+                y: 20
 
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.qData && root.qData.answers.length > 1
-                          ? root.qData.answers[1] : ""
-                    color: "#ffffff"
-                    font { pixelSize: 28; bold: true; family: "monospace" }
-                }
-
-                Row {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 8
-                    visible: root.isReveal
+                Repeater {
+                    model: root.game.blitzResults
 
                     Rectangle {
-                        width: 36; height: 22; radius: 4
-                        color: root.colA
-                        visible: root.game.player1Answer === 1
-                        Text {
+                        width: summaryCol.width
+                        height: pairContent.height + 20
+                        radius: 8
+                        color: modelData.matched ? "#1a3a1a" : "#2a1a1a"
+                        border.color: modelData.matched ? root.colCorrect
+                                      : (modelData.bastiAnswer < 0
+                                         || modelData.crowdAnswer < 0)
+                                        ? root.colTimeout : root.colWrong
+                        border.width: 1
+
+                        Column {
+                            id: pairContent
                             anchors.centerIn: parent
-                            text: "S1"
-                            color: "#ffffff"
-                            font { pixelSize: 11; bold: true; family: "monospace" }
-                        }
-                    }
-                    Rectangle {
-                        width: 36; height: 22; radius: 4
-                        color: root.colD
-                        visible: root.game.player2Answer === 1
-                        Text {
-                            anchors.centerIn: parent
-                            text: "S2"
-                            color: "#ffffff"
-                            font { pixelSize: 11; bold: true; family: "monospace" }
+                            width: parent.width - 20
+                            spacing: 6
+
+                            Text {
+                                width: parent.width
+                                text: modelData.pairText
+                                color: "#ffffff"
+                                font { pixelSize: 18; bold: true; family: "monospace" }
+                                wrapMode: Text.WordWrap
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+
+                            Row {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                spacing: 20
+
+                                Text {
+                                    text: "S1: " + (modelData.bastiAnswer >= 0
+                                          && modelData.bastiAnswer < modelData.answers.length
+                                          ? modelData.answers[modelData.bastiAnswer]
+                                          : "\u2014")
+                                    color: root.colA
+                                    font { pixelSize: 14; family: "monospace" }
+                                }
+
+                                Text {
+                                    text: "S2: " + (modelData.crowdAnswer >= 0
+                                          && modelData.crowdAnswer < modelData.answers.length
+                                          ? modelData.answers[modelData.crowdAnswer]
+                                          : "\u2014")
+                                    color: root.colD
+                                    font { pixelSize: 14; family: "monospace" }
+                                }
+                            }
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: {
+                                    if (modelData.bastiAnswer < 0
+                                        || modelData.crowdAnswer < 0)
+                                        return "\u2717 ZU LANGSAM";
+                                    return modelData.matched
+                                           ? "\u2713 MATCH" : "\u2717 KEIN MATCH";
+                                }
+                                color: {
+                                    if (modelData.bastiAnswer < 0
+                                        || modelData.crowdAnswer < 0)
+                                        return root.colTimeout;
+                                    return modelData.matched
+                                           ? root.colCorrect : root.colWrong;
+                                }
+                                font { pixelSize: 16; bold: true; family: "monospace" }
+                            }
                         }
                     }
                 }
             }
+
+            // Auto-scroll animation during blitzSummary
+            NumberAnimation on contentY {
+                id: scrollAnim
+                from: 0
+                to: Math.max(0, summaryCol.height + 40 - summaryFlick.height)
+                duration: root.game.blitzResults.length * 3000
+                running: root.game.phase === "blitzSummary"
+                easing.type: Easing.InOutQuad
+            }
         }
     }
 
-    // Match result text
-    Text {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: cardRow.y + cardRow.height + 20
-        visible: root.isReveal
-        text: root.game.player1Correct ? "MATCH! +100" : "KEIN MATCH"
-        color: root.game.player1Correct ? root.colCorrect : root.colWrong
-        font { pixelSize: 36; bold: true; family: "monospace" }
-        opacity: root.isReveal ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 400 } }
-    }
-
-    // Score bar at bottom
+    // ====== Score bar (always visible) ======
     Row {
         id: scoreBar
         anchors.horizontalCenter: parent.horizontalCenter
@@ -228,10 +411,11 @@ Item {
 
         Rectangle {
             width: 160; height: 50; radius: 6
-            color: root.game.player1Locked && root.game.phase === "question"
+            color: root.game.player1Locked
+                   && root.game.phase === "blitzPair"
                    ? Qt.lighter(root.colA, 1.6) : root.colA
             border.width: root.game.player1Locked
-                          && root.game.phase === "question" ? 2 : 0
+                          && root.game.phase === "blitzPair" ? 2 : 0
             border.color: root.gold
             Behavior on color { ColorAnimation { duration: 300 } }
 
@@ -255,10 +439,11 @@ Item {
 
         Rectangle {
             width: 160; height: 50; radius: 6
-            color: root.game.player2Locked && root.game.phase === "question"
+            color: root.game.player2Locked
+                   && root.game.phase === "blitzPair"
                    ? Qt.lighter(root.colD, 1.6) : root.colD
             border.width: root.game.player2Locked
-                          && root.game.phase === "question" ? 2 : 0
+                          && root.game.phase === "blitzPair" ? 2 : 0
             border.color: root.gold
             Behavior on color { ColorAnimation { duration: 300 } }
 
@@ -278,116 +463,6 @@ Item {
                     font { pixelSize: 22; bold: true; family: "monospace" }
                 }
             }
-        }
-    }
-
-    // Floating points - Player 1
-    Text {
-        id: floatingPoints1
-        x: scoreBar.x + 80 - width / 2
-        y: scoreBar.y - 50
-        text: "+" + root.game.player1PointsEarned
-        color: root.game.player1Correct ? root.colCorrect : root.colWrong
-        font { pixelSize: 32; bold: true; family: "monospace" }
-        opacity: 0
-        scale: 1.5
-        transformOrigin: Item.Bottom
-    }
-
-    // Floating points - Player 2
-    Text {
-        id: floatingPoints2
-        x: scoreBar.x + 260 - width / 2
-        y: scoreBar.y - 50
-        text: "+" + root.game.player2PointsEarned
-        color: root.game.player2Correct ? root.colCorrect : root.colWrong
-        font { pixelSize: 32; bold: true; family: "monospace" }
-        opacity: 0
-        scale: 1.5
-        transformOrigin: Item.Bottom
-    }
-
-    SequentialAnimation {
-        id: pointRevealSequence
-
-        ScriptAction {
-            script: {
-                if (root.game.player1Correct) {
-                    if (root.correctSound) root.correctSound.play();
-                } else {
-                    if (root.wrongSound) root.wrongSound.play();
-                }
-            }
-        }
-        ParallelAnimation {
-            NumberAnimation {
-                target: floatingPoints1; property: "opacity"
-                from: 0; to: 1.0; duration: 300
-            }
-            NumberAnimation {
-                target: floatingPoints1; property: "scale"
-                from: 1.5; to: 1.0; duration: 300
-                easing.type: Easing.OutBack
-            }
-            NumberAnimation {
-                target: floatingPoints2; property: "opacity"
-                from: 0; to: 1.0; duration: 300
-            }
-            NumberAnimation {
-                target: floatingPoints2; property: "scale"
-                from: 1.5; to: 1.0; duration: 300
-                easing.type: Easing.OutBack
-            }
-        }
-        PauseAnimation { duration: 500 }
-        ScriptAction {
-            script: {
-                root.game.awardPoints(0);
-                root.game.awardPoints(1);
-            }
-        }
-        ParallelAnimation {
-            NumberAnimation {
-                target: floatingPoints1; property: "scale"
-                to: 0.3; duration: 400; easing.type: Easing.InCubic
-            }
-            NumberAnimation {
-                target: floatingPoints1; property: "opacity"
-                to: 0; duration: 400
-            }
-            NumberAnimation {
-                target: floatingPoints1; property: "y"
-                to: scoreBar.y; duration: 400; easing.type: Easing.InCubic
-            }
-            NumberAnimation {
-                target: floatingPoints2; property: "scale"
-                to: 0.3; duration: 400; easing.type: Easing.InCubic
-            }
-            NumberAnimation {
-                target: floatingPoints2; property: "opacity"
-                to: 0; duration: 400
-            }
-            NumberAnimation {
-                target: floatingPoints2; property: "y"
-                to: scoreBar.y; duration: 400; easing.type: Easing.InCubic
-            }
-        }
-    }
-
-    Connections {
-        target: root.game
-        function onPointRevealStarted() {
-            floatingPoints1.y = scoreBar.y - 50;
-            floatingPoints1.opacity = 0;
-            floatingPoints1.scale = 1.5;
-            floatingPoints2.y = scoreBar.y - 50;
-            floatingPoints2.opacity = 0;
-            floatingPoints2.scale = 1.5;
-            pointRevealSequence.restart();
-        }
-        function onPhaseChanged() {
-            if (root.game.phase !== "reveal")
-                pointRevealSequence.stop();
         }
     }
 }

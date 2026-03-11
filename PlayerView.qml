@@ -68,15 +68,27 @@ Item {
                          || root.game.phase === "singingReveal"
                          || root.game.phase === "console"
                          || root.game.phase === "consoleResult"
+                         || root.game.phase === "blitzReady"
+                         || root.game.phase === "blitzReveal"
+                         || root.game.phase === "blitzDone"
+                         || root.game.phase === "blitzSummary"
+                         || root.game.phase === "blitzSummaryDone"
                 text: {
                     if (root.game.phase === "title") return "...";
-                    if (root.game.phase === "roundIntro") return "Bereit!";
+                    if (root.game.phase === "roundIntro"
+                        || root.game.phase === "blitzReady")
+                        return "Bereit!";
                     if (root.game.phase === "singingActive"
                         || root.game.phase === "singingReveal")
                         return "Mods vergeben\nPunkte";
                     if (root.game.phase === "console"
                         || root.game.phase === "consoleResult")
                         return "Solo-Runde";
+                    if (root.game.phase === "blitzReveal"
+                        || root.game.phase === "blitzDone"
+                        || root.game.phase === "blitzSummary"
+                        || root.game.phase === "blitzSummaryDone")
+                        return "Geschmacks-Blitz!";
                     return "...";
                 }
                 color: "#888888"
@@ -154,7 +166,8 @@ Item {
                 anchors.fill: parent
                 anchors.margins: 6
                 spacing: 6
-                visible: root.game.phase === "question"
+                visible: (root.game.phase === "question"
+                          || root.game.phase === "blitzPair")
                          && root.game.currentMode === "taste"
 
                 Repeater {

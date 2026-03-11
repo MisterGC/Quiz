@@ -6,149 +6,216 @@ Item {
     property QtObject game: null
 
     readonly property color gold: "#ffcc00"
+    readonly property color colCorrect: "#00e676"
+    readonly property color colWrong: "#ff1744"
 
-    // --- Question phase ---
+    readonly property int totalPairs: game && game.currentRoundData
+                                      ? game.currentRoundData.questions.length : 0
+
+    // --- blitzReady: "Blitz starten" ---
     Column {
         anchors.centerIn: parent
         spacing: 10
-        visible: root.game.phase === "question"
+        visible: root.game.phase === "blitzReady"
         width: parent.width - 20
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "GESCHMACKSFRAGE " + (root.game.currentQuestion + 1)
+            text: "GESCHMACKS-BLITZ"
             color: root.gold
-            font { pixelSize: 13; bold: true; family: "monospace" }
+            font { pixelSize: 16; bold: true; family: "monospace" }
         }
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width - 10
-            text: root.game.currentQuestionData
-                  ? root.game.currentQuestionData.text : ""
-            color: "#cccccc"
+            text: root.totalPairs + " Paare \u2014 je 5 Sek."
+            color: "#aaaaaa"
             font { pixelSize: 12; family: "monospace" }
-            wrapMode: Text.WordWrap
-            horizontalAlignment: Text.AlignHCenter
-        }
-
-        // Show both options
-        Column {
-            width: parent.width
-            spacing: 4
-
-            Repeater {
-                model: root.game.currentQuestionData
-                       ? root.game.currentQuestionData.answers : []
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: (index + 1) + ". " + modelData
-                    color: "#aaaaaa"
-                    font { pixelSize: 12; family: "monospace" }
-                }
-            }
-        }
-
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "(Keine richtige Antwort \u2014 Match z\u00e4hlt)"
-            color: "#666666"
-            font { pixelSize: 10; italic: true; family: "monospace" }
         }
 
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 160; height: 44; radius: 6
+            width: 180; height: 48; radius: 6
             color: "#2a7a3a"
-            visible: !root.game.answersRevealed
 
             Text {
                 anchors.centerIn: parent
-                text: "Optionen zeigen"
+                text: "Blitz starten"
                 color: "#ffffff"
                 font { pixelSize: 16; bold: true; family: "monospace" }
             }
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.game.showAnswers()
-            }
-        }
-
-        Column {
-            width: parent.width
-            spacing: 8
-            visible: root.game.answersRevealed
-
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "S1: " + (root.game.player1Locked ? "\u2713" : "...")
-                      + "  S2: " + (root.game.player2Locked ? "\u2713" : "...")
-                color: (root.game.player1Locked && root.game.player2Locked)
-                       ? root.gold : "#666666"
-                font { pixelSize: 12; family: "monospace" }
-            }
-
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "Timer: " + (root.game.timerValue / 10.0).toFixed(1) + "s"
-                color: "#888888"
-                font { pixelSize: 11; family: "monospace" }
-                visible: root.game.timerRunning
-            }
-
-            Rectangle {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: 160; height: 44; radius: 6
-                color: "#8a5a2a"
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "Aufdecken"
-                    color: "#ffffff"
-                    font { pixelSize: 16; bold: true; family: "monospace" }
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.game.revealAnswer()
-                }
+                onClicked: root.game.startBlitz()
             }
         }
     }
 
-    // --- Reveal phase ---
+    // --- blitzPair / blitzReveal: Status display ---
     Column {
         anchors.centerIn: parent
         spacing: 8
-        visible: root.game.phase === "reveal"
+        visible: root.game.phase === "blitzPair"
+                 || root.game.phase === "blitzReveal"
+        width: parent.width - 20
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: root.game.player1Correct ? "MATCH!" : "KEIN MATCH"
-            color: root.game.player1Correct ? "#00e676" : "#ff1744"
-            font { pixelSize: 16; bold: true; family: "monospace" }
+            text: "PAAR " + (root.game.currentQuestion + 1) + "/" + root.totalPairs
+            color: root.gold
+            font { pixelSize: 14; bold: true; family: "monospace" }
         }
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: root.game.player1Correct ? "+100 f\u00fcr beide" : "Keine Punkte"
-            color: "#cccccc"
+            text: {
+                var r = root.game.blitzResults;
+                var matches = 0;
+                for (var i = 0; i < r.length; i++)
+                    if (r[i].matched) matches++;
+                return "Matches: " + matches + "/" + r.length;
+            }
+            color: "#aaaaaa"
             font { pixelSize: 12; family: "monospace" }
         }
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "S1: " + root.game.player1Score
-                  + "  S2: " + root.game.player2Score
+            text: root.game.phase === "blitzPair"
+                  ? "S1: " + (root.game.player1Locked ? "\u2713" : "...")
+                    + "  S2: " + (root.game.player2Locked ? "\u2713" : "...")
+                  : ""
+            color: (root.game.player1Locked && root.game.player2Locked)
+                   ? root.gold : "#666666"
+            font { pixelSize: 12; family: "monospace" }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: (root.game.timerValue / 10.0).toFixed(1) + "s"
+            color: "#888888"
+            font { pixelSize: 11; family: "monospace" }
+            visible: root.game.timerRunning
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: root.game.phase === "blitzReveal"
+            text: {
+                var r = root.game.blitzResults;
+                if (r.length === 0) return "";
+                var last = r[r.length - 1];
+                if (last.bastiAnswer < 0 || last.crowdAnswer < 0)
+                    return "ZU LANGSAM";
+                return last.matched ? "JUBEL!" : "OHHHH";
+            }
+            color: {
+                var r = root.game.blitzResults;
+                if (r.length === 0) return "#ffffff";
+                var last = r[r.length - 1];
+                if (last.bastiAnswer < 0 || last.crowdAnswer < 0)
+                    return "#ff9800";
+                return last.matched ? root.colCorrect : root.colWrong;
+            }
+            font { pixelSize: 18; bold: true; family: "monospace" }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "(L\u00e4uft automatisch)"
+            color: "#555555"
+            font { pixelSize: 10; italic: true; family: "monospace" }
+        }
+    }
+
+    // --- blitzDone: "Zusammenfassung" button ---
+    Column {
+        anchors.centerIn: parent
+        spacing: 10
+        visible: root.game.phase === "blitzDone"
+        width: parent.width - 20
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "BLITZ VORBEI"
             color: root.gold
-            font { pixelSize: 12; bold: true; family: "monospace" }
+            font { pixelSize: 16; bold: true; family: "monospace" }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: root.game.blitzMatchCount + "/" + root.totalPairs
+                  + " \u00dcbereinstimmungen"
+            color: "#aaaaaa"
+            font { pixelSize: 12; family: "monospace" }
         }
 
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 160; height: 44; radius: 6
+            width: 200; height: 48; radius: 6
+            color: "#2a4a8a"
+
+            Text {
+                anchors.centerIn: parent
+                text: "Zusammenfassung"
+                color: "#ffffff"
+                font { pixelSize: 16; bold: true; family: "monospace" }
+            }
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.game.startBlitzSummary()
+            }
+        }
+    }
+
+    // --- blitzSummary: auto-scrolling ---
+    Column {
+        anchors.centerIn: parent
+        spacing: 8
+        visible: root.game.phase === "blitzSummary"
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "ZUSAMMENFASSUNG..."
+            color: root.gold
+            font { pixelSize: 14; bold: true; family: "monospace" }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: (root.game.timerValue / 10.0).toFixed(1) + "s"
+            color: "#888888"
+            font { pixelSize: 11; family: "monospace" }
+        }
+    }
+
+    // --- blitzSummaryDone: "Weiter" button ---
+    Column {
+        anchors.centerIn: parent
+        spacing: 10
+        visible: root.game.phase === "blitzSummaryDone"
+        width: parent.width - 20
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: root.game.blitzMatchCount + "/" + root.totalPairs
+                  + " MATCHES"
+            color: root.gold
+            font { pixelSize: 16; bold: true; family: "monospace" }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "+" + (root.game.blitzMatchCount * 50) + " Punkte f\u00fcr beide"
+            color: "#cccccc"
+            font { pixelSize: 12; family: "monospace" }
+        }
+
+        Rectangle {
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 160; height: 48; radius: 6
             color: "#2a4a8a"
 
             Text {
@@ -160,7 +227,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.game.nextStep()
+                onClicked: root.game.advanceFromBlitzSummary()
             }
         }
     }

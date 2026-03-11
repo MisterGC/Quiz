@@ -443,6 +443,9 @@ Item {
                  || root.game.phase === "duelResult"
                  || root.game.phase === "console" || root.game.phase === "consoleResult"
                  || root.game.phase === "singingActive" || root.game.phase === "singingReveal"
+                 || root.game.phase === "blitzReady" || root.game.phase === "blitzPair"
+                 || root.game.phase === "blitzReveal" || root.game.phase === "blitzDone"
+                 || root.game.phase === "blitzSummary" || root.game.phase === "blitzSummaryDone"
         opacity: visible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 400 } }
 
