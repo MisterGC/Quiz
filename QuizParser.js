@@ -99,7 +99,9 @@ function parse(markdown) {
                 timer: 0,
                 url: "",
                 goal: "",
-                hints: []
+                hints: [],
+                matchAction: "",
+                mismatchAction: ""
             };
             i++;
 
@@ -120,6 +122,10 @@ function parse(markdown) {
                     currentQuestion.goal = qmeta.replace(/^Goal:\s*/i, "");
                 else if (qmeta.match(/^Hint:\s*/i))
                     currentQuestion.hints.push(qmeta.replace(/^Hint:\s*/i, ""));
+                else if (qmeta.match(/^MatchAction:\s*/i))
+                    currentQuestion.matchAction = qmeta.replace(/^MatchAction:\s*/i, "");
+                else if (qmeta.match(/^MismatchAction:\s*/i))
+                    currentQuestion.mismatchAction = qmeta.replace(/^MismatchAction:\s*/i, "");
                 else if (currentQuestion.answers.length > 0 && !currentQuestion.roast)
                     currentQuestion.roast = qmeta;
                 i++;
