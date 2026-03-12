@@ -68,6 +68,15 @@
 > Hint: Yu Suzuki (Sega AM2) reiste persönlich nach China, um echte Kampfkünste zu studieren. Jeder der 8 Charaktere beherrscht einen realen Kampfstil — Akira Yuki z.B. Bajiquan (八極拳), eine explosive chinesische Nahkampfkunst. Dural, der geheime Endgegner, ist eine metallische Figur die alle Stile kombiniert.
 > Hint: Der Saturn-Port verkaufte sich in Japan nahezu 1:1 mit der Konsole — Segas initiale 200.000 Einheiten waren am ersten Tag ausverkauft. Virtua Fighter rettete damit praktisch den Saturn-Launch in Japan.
 
+### Chihiro und Haku reisen mit einer Maus zu Zeniba — was ist die Maus in Wirklichkeit?
+- [ ] Der Hexer Kamaji
+- [ ] Die Tante Lin
+- [x] Das Baby von Yubaba
+- [ ] Das Ungeheuer Kaonashi
+> Hint: In "Chihiros Reise ins Zauberland" (2001) verwandelt Zeniba das riesige Baby Bō in eine kleine Maus — als Strafe für Yubabas Gier. In dieser Form reist Bō mit Chihiro und beweist überraschend viel Mut.
+> Hint: Hayao Miyazakis Film gewann 2003 den Oscar für den besten Animationsfilm — als erster (und lange einziger) Anime überhaupt. In Japan war er bis 2020 der erfolgreichste Film aller Zeiten.
+> Hint: Das Badehaus, in dem Chihiro arbeitet, ist inspiriert von realen japanischen Onsen und dem Edo-Tokyo Open Air Architectural Museum. Miyazaki besuchte das Museum regelmäßig zur Recherche.
+
 ---
 
 ## Du kommst hier nicht rein! Oder doch?
