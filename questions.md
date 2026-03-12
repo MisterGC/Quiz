@@ -27,12 +27,14 @@
 > Hint: Am Ende von Gothic 1 erwacht der Schläfer tatsächlich — der Namenlose Held muss ihn in der Tiefe besiegen. "Verpennt" hat er also definitiv nicht.
 > Hint: Gothic 1 (2001, Piranha Bytes) war ein deutsches RPG-Meisterwerk — bekannt für seine lebendige Spielwelt, in der NPCs eigene Tagesabläufe hatten und auf gezogene Waffen aggressiv reagierten.
 
-### In welchem 90er-Spiel hieß der Protagonist 'Guybrush Threepwood'?
-- [ ] Day of the Tentacle
-- [ ] Sam & Max Hit the Road
-- [x] The Secret of Monkey Island
-- [ ] Full Throttle
-> Du kämpfst wie ein Bauer.
+### Damn, was hat der Duke NICHT gesagt?
+- [ ] "Damn, I'm looking good!"
+- [ ] "Damn, I'm good!"
+- [x] "Damn, that was good!"
+- [ ] "Damn, you're ugly!"
+> Hint: Duke liebte "Damn" — aber jedes Zitat hatte seinen festen Platz: "Damn, I'm looking good!" vor dem Spiegel, "Damn, I'm good!" nach besiegten Gegnern, und "Damn... you're ugly!" beim Anblick der Aliens. "Damn, that was good!" klingt nach Duke, existiert aber nicht im Spiel.
+> Hint: Duke Nukem 3D (1996, 3D Realms) war berüchtigt für geklaute Film-Zitate: "Hail to the king, baby!" aus Army of Darkness, der Bubblegum-Spruch aus "They Live", und "I'll rip your head off and shit down your neck" aus Full Metal Jacket.
+> Hint: Gesprochen wurde Duke von Jon St. John, dessen Stimme so ikonisch wurde, dass er bis heute auf Conventions "Hail to the king, baby!" zum Besten gibt. Fun Fact: Die Sprachaufnahmen für DN3D dauerten nur einen einzigen Tag.
 
 ### Wie heißt die erste Episode von 'Doom' (1993)?
 - [ ] The Shores of Hell
