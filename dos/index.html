@@ -1,49 +1,1440 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
-<head>
-<meta charset="UTF-8">
-<title>DOS Terminal</title>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  background: #000;
-  color: #c0c0c0;
-  font-family: "Courier New", monospace;
-  font-size: 16px;
-  height: 100vh;
-  overflow: hidden;
-  position: relative;
-}
-#terminal {
-  padding: 20px;
-  line-height: 1.4;
-}
-.cursor {
-  display: inline-block;
-  animation: blink 1s step-end infinite;
-}
-@keyframes blink {
-  50% { opacity: 0; }
-}
-/* CRT scanlines */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    transparent 0px, transparent 2px,
-    rgba(255,255,255,0.04) 2px, rgba(255,255,255,0.04) 3px
-  );
-  pointer-events: none;
-}
-</style>
-</head>
-<body>
-<div id="terminal">
-Microsoft(R) MS-DOS Version 6.22<br>
-(C)Copyright Microsoft Corp 1981-1994.<br>
-<br>
-C:\&gt;<span class="cursor">_</span>
-</div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MS-DOS Retro Console</title>
+    <style>
+      :root {
+        --bg: #000000;
+        --screen: #000000;
+        --text: #f2f2f2;
+        --text-dim: #cfcfcf;
+        --warn: #ffffff;
+        --shadow: rgba(255, 255, 255, 0.2);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at center, #1a1a1a 0%, #000 70%);
+        overflow: hidden;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        font-family: "Courier New", Courier, monospace;
+      }
+
+      .monitor {
+        position: relative;
+        width: min(980px, 96vw);
+        height: min(620px, 92vh);
+        border: 14px solid #2a2a2a;
+        border-radius: 14px;
+        background: #111;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(255, 255, 255, 0.08);
+        padding: 18px;
+      }
+
+      .screen {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: var(--screen);
+        border-radius: 6px;
+        border: 2px solid #4a4a4a;
+        color: var(--text);
+        text-shadow: 0 0 4px var(--shadow);
+        overflow: hidden;
+      }
+
+      .screen::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.07) 0px,
+          rgba(0, 0, 0, 0.07) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+        pointer-events: none;
+      }
+
+      .screen::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+        pointer-events: none;
+      }
+
+      .terminal {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        padding: 18px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        line-height: 1.35;
+        font-size: clamp(13px, 1.8vw, 18px);
+      }
+
+      .terminal.fullscreen-media {
+        padding: 0;
+        overflow: hidden;
+      }
+
+      .fullscreen-frame {
+        position: absolute;
+        inset: 0;
+        background: #000;
+      }
+
+      .fullscreen-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+
+      .media-note {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: 10px;
+        font-size: 0.8em;
+        color: #d8d8d8;
+        text-align: center;
+        text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+      }
+
+      .terminal::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .terminal::-webkit-scrollbar-thumb {
+        background: #5a5a5a;
+      }
+
+      .line {
+        margin: 0;
+      }
+
+      .line.warn {
+        color: var(--warn);
+      }
+
+      .input-row {
+        display: flex;
+        align-items: center;
+        gap: 0;
+      }
+
+      .prompt {
+        color: var(--text-dim);
+        flex: none;
+      }
+
+      .cmd-before,
+      .cmd-after {
+        white-space: pre;
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 10px;
+        height: 1em;
+        background: var(--text);
+        margin-right: 0;
+        vertical-align: text-bottom;
+        animation: blink 1s steps(1) infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="monitor" aria-label="MS-DOS Konsole">
+      <section class="screen">
+        <div class="terminal" id="terminal" tabindex="0" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script>
+      const terminal = document.getElementById("terminal");
+      const state = {
+        history: [],
+        historyIndex: -1,
+        currentInput: "",
+        cursorIndex: 0,
+        pathSegments: [],
+        editor: null,
+        wingCommanderMode: false,
+        wingCommanderAudio: null,
+        beepAudioContext: null,
+      };
+
+      let contentTree = { directories: {}, files: [] };
+      const defaultMessages = {
+        helpLines: [
+          "Verfuegbare Befehle:",
+          "HELP         Zeigt diese Hilfe",
+          "CLS          Loescht den Bildschirm",
+          "DATE         Zeigt aktuelles Datum",
+          "TIME         Zeigt aktuelle Uhrzeit",
+          "VER          Zeigt DOS-Version",
+          "DIR          Listet Dateien im aktuellen Ordner auf",
+          "CD <ORDNER>  Wechselt Verzeichnis",
+          "CD ..        Geht ein Verzeichnis hoch",
+          "TYPE <DATEI> Zeigt Dateiinhalt aus /content",
+          "EDIT <DATEI> Oeffnet Datei im MS-DOS Editor",
+          "EMSMANAGER   Initialisiert den Expanded Memory Manager",
+          "REBOOT       Simuliert Neustart mit POST/BIOS Checks",
+          "ECHO <TEXT>  Gibt Text aus",
+          "EXIT         Schliesst die Session (simuliert)",
+        ],
+        dateTemplate: "Aktuelles Datum: {date}",
+        timeTemplate: "Aktuelle Zeit: {time}",
+        versionLine: "MS-DOS Version 6.22 (Retro-Simulation)",
+        dirHeaderTemplate: " Verzeichnis von {path}",
+        currentDirMarker: ".",
+        parentDirMarker: "..",
+        pathNotFound: "Pfad nicht gefunden",
+        syntaxError: "Syntaxfehler",
+        fileNotFound: "Datei nicht gefunden",
+        fileReadError: "Datei konnte nicht gelesen werden",
+        sessionEnded: "Session beendet. Druecke F5 fuer Neustart.",
+        invalidCommand: "Ungueltiger Befehl oder Dateiname",
+        programNotRunnableTemplate: "Programm {name} kann in dieser Simulation nicht ausgefuehrt werden.",
+        autocompleteUnavailable: "Auto-Complete nicht verfuegbar",
+        bootVersionLine: "Microsoft(R) MS-DOS(R) Version 6.22",
+        bootCopyrightLine: "(C)Copyright Microsoft Corp 1981-1994.",
+        bootStartTemplate: "Startzeit: {date} {time}",
+        bootHelpHint: "Tippe HELP fuer verfuegbare Befehle.",
+        manifestLoadError: "Fehler: content/manifest.json konnte nicht geladen werden.",
+        manifestHint: "Lege die komplette Ordner-/Dateistruktur und Befehle in dieser Config-Datei fest.",
+        editorTitleTemplate: "MS-DOS Editor - {file}",
+        editorHintLine: "Ctrl+S Speichern  Esc Beenden  F10 Speichern+Beenden",
+        editorSavedTemplate: "{file} gespeichert.",
+      };
+
+      const defaultCommands = {
+        HELP: { action: "help" },
+        CLS: { action: "clear" },
+        DATE: { action: "date" },
+        TIME: { action: "time" },
+        VER: { action: "version" },
+        DIR: { action: "dir" },
+        CD: { action: "cd" },
+        TYPE: { action: "type" },
+        EDIT: { action: "edit" },
+        REBOOT: { action: "reboot" },
+        ECHO: { action: "echo" },
+        EXIT: { action: "exit" },
+      };
+
+      const defaultPrograms = {
+        EMSMANAGER: {
+          output: [
+            "MICROSOFT Expanded Memory Manager 386   Version 4.00",
+            "(C) Copyright MICROSOFT Corporation 1988",
+            "Size of expanded memory pool adjusted.",
+            "Page Frame Base Address adjusted.",
+            "EMM386 Installed.",
+            "",
+            "            Extended memory allocated:     2528 KB",
+            "            System memory allocated:         384 KB",
+            "                                       ----------",
+            "            Expanded memory available:      2912 KB",
+            "            Page frame base address:       C8000 H",
+          ],
+        },
+      };
+
+      const defaultWingCommanderStartup = [
+        { text: "Booting flight systems...", waitMs: 500 },
+        { text: "Mounting ORIGIN.PAK", waitMs: 400 },
+        { text: "Checking expanded memory manager...", waitMs: 500 },
+        { text: "Loading starfield renderer...", waitMs: 450 },
+        { text: "Launching Wing Commander", waitMs: 700 },
+      ];
+
+      const defaultRebootSequence = [
+        { text: "Rebooting...", waitMs: 300 },
+        { text: "", waitMs: 120 },
+        { text: "IBM Personal Computer AT", waitMs: 250 },
+        { text: "BIOS Version 01.10.00", waitMs: 250 },
+        { text: "640K OK", waitMs: 300 },
+        { text: "Keyboard... OK", waitMs: 200 },
+        { text: "Fixed Disk 0... OK", waitMs: 250 },
+        { text: "Booting from C:", waitMs: 350 },
+      ];
+
+      let runtimeConfig = {
+        messages: defaultMessages,
+        commands: defaultCommands,
+        executableExtensions: [".EXE"],
+        programs: defaultPrograms,
+        wingCommanderStartup: defaultWingCommanderStartup,
+        rebootSequence: defaultRebootSequence,
+      };
+
+      function printLine(text = "", cls = "") {
+        const p = document.createElement("p");
+        p.className = `line ${cls}`.trim();
+        p.textContent = text;
+        const activeRow = terminal.querySelector(".input-row:last-of-type");
+        if (activeRow) {
+          terminal.insertBefore(p, activeRow);
+        } else {
+          terminal.appendChild(p);
+        }
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+
+      function getPromptPath() {
+        return state.pathSegments.length ? `C:\\${state.pathSegments.join("\\")}` : "C:\\";
+      }
+
+      function normalizeTree(node) {
+        const result = { directories: {}, files: [] };
+        const directories =
+          node && typeof node === "object" && node.directories && typeof node.directories === "object"
+            ? node.directories
+            : {};
+        const files = Array.isArray(node?.files) ? node.files : [];
+
+        Object.entries(directories).forEach(([name, child]) => {
+          result.directories[String(name).toUpperCase()] = normalizeTree(child);
+        });
+        result.files = files
+          .map((entry) => {
+            if (typeof entry === "string") {
+              return { name: String(entry).toUpperCase() };
+            }
+
+            if (!entry || typeof entry !== "object") {
+              return null;
+            }
+
+            const rawName = typeof entry.name === "string" ? entry.name : "";
+            const name = rawName.toUpperCase();
+            if (!name) {
+              return null;
+            }
+
+            return {
+              name,
+              path: typeof entry.path === "string" ? entry.path : null,
+              size: Number.isFinite(entry.size) ? Number(entry.size) : 1024,
+              type: typeof entry.type === "string" ? entry.type.toLowerCase() : null,
+              content: typeof entry.content === "string" ? entry.content : null,
+              onExecute: Array.isArray(entry.onExecute)
+                ? entry.onExecute.filter((line) => typeof line === "string")
+                : null,
+            };
+          })
+          .filter(Boolean);
+        return result;
+      }
+
+      function normalizeMessages(rawMessages) {
+        const messages = { ...defaultMessages };
+        if (!rawMessages || typeof rawMessages !== "object") {
+          return messages;
+        }
+
+        Object.entries(rawMessages).forEach(([key, value]) => {
+          if (key === "helpLines") {
+            messages.helpLines = Array.isArray(value) ? value.filter((line) => typeof line === "string") : messages.helpLines;
+            return;
+          }
+          if (typeof value === "string") {
+            messages[key] = value;
+          }
+        });
+        return messages;
+      }
+
+      function normalizeCommands(rawCommands) {
+        const commands = {};
+        const source = rawCommands && typeof rawCommands === "object" ? rawCommands : defaultCommands;
+
+        Object.entries(source).forEach(([name, definition]) => {
+          if (!definition || typeof definition !== "object" || typeof definition.action !== "string") {
+            return;
+          }
+          commands[String(name).toUpperCase()] = { action: definition.action.toLowerCase() };
+        });
+
+        return Object.keys(commands).length ? commands : defaultCommands;
+      }
+
+      function normalizeProgramName(value) {
+        const upper = String(value || "").trim().toUpperCase();
+        return upper.endsWith(".EXE") ? upper.slice(0, -4) : upper;
+      }
+
+      function normalizePrograms(rawPrograms) {
+        const source = rawPrograms && typeof rawPrograms === "object" ? rawPrograms : defaultPrograms;
+        const programs = {};
+
+        Object.entries(source).forEach(([rawName, definition]) => {
+          const name = normalizeProgramName(rawName);
+          if (!name || !definition || typeof definition !== "object") {
+            return;
+          }
+          const output = Array.isArray(definition.output) ? definition.output.filter((line) => typeof line === "string") : [];
+          if (!output.length) {
+            return;
+          }
+          programs[name] = { output };
+        });
+
+        return Object.keys(programs).length ? programs : defaultPrograms;
+      }
+
+      function normalizeWingCommanderStartup(rawStartup) {
+        if (!Array.isArray(rawStartup) || !rawStartup.length) {
+          return defaultWingCommanderStartup;
+        }
+
+        const steps = rawStartup
+          .map((step) => {
+            if (!step || typeof step !== "object" || typeof step.text !== "string") {
+              return null;
+            }
+            return {
+              text: step.text,
+              waitMs: Number.isFinite(step.waitMs) ? Math.max(0, Math.floor(step.waitMs)) : 400,
+              warn: Boolean(step.warn),
+            };
+          })
+          .filter(Boolean);
+
+        return steps.length ? steps : defaultWingCommanderStartup;
+      }
+
+      function normalizeRebootSequence(rawSequence) {
+        if (!Array.isArray(rawSequence) || !rawSequence.length) {
+          return defaultRebootSequence;
+        }
+
+        const steps = rawSequence
+          .map((step) => {
+            if (!step || typeof step !== "object" || typeof step.text !== "string") {
+              return null;
+            }
+            return {
+              text: step.text,
+              waitMs: Number.isFinite(step.waitMs) ? Math.max(0, Math.floor(step.waitMs)) : 300,
+              warn: Boolean(step.warn),
+            };
+          })
+          .filter(Boolean);
+
+        return steps.length ? steps : defaultRebootSequence;
+      }
+
+      function formatTemplate(template, replacements) {
+        return template.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, key) => String(replacements[key] ?? ""));
+      }
+
+      function getCurrentNode() {
+        return getNodeBySegments(state.pathSegments);
+      }
+
+      function getFileEntry(node, filename) {
+        return node.files.find((file) => file.name === filename) || null;
+      }
+
+      function upsertFileEntry(pathSegments, filename) {
+        const node = getNodeBySegments(pathSegments);
+        let entry = getFileEntry(node, filename);
+        if (entry) {
+          return entry;
+        }
+
+        entry = {
+          name: filename,
+          size: 0,
+          content: "",
+          type: filename.endsWith(".EXE") ? "exe" : null,
+          path: null,
+          onExecute: null,
+        };
+        node.files.push(entry);
+        return entry;
+      }
+
+      function getProgramOutputByCommand(command) {
+        const normalized = normalizeProgramName(command);
+        const definition = runtimeConfig.programs[normalized];
+        if (!definition || !Array.isArray(definition.output) || !definition.output.length) {
+          return null;
+        }
+        return definition.output;
+      }
+
+      async function hasConfigLine(pathSegments, filename, expectedLine) {
+        const node = getNodeBySegments(pathSegments);
+        const fileEntry = getFileEntry(node, filename);
+        if (!fileEntry) {
+          return false;
+        }
+        const content = await readContentFile(pathSegments, fileEntry);
+        if (content === null) {
+          return false;
+        }
+        const target = expectedLine.trim().toUpperCase();
+        return content
+          .split("\n")
+          .map((line) => line.replace(/\r$/, "").trim().toUpperCase())
+          .includes(target);
+      }
+
+      async function startWingCommanderAudio(options = {}) {
+        const warmup = Boolean(options.warmup);
+        const sources = [
+          "content/wingcommander.mid",
+          "content/wingcommander.mp3",
+          "content/wingcommander.ogg",
+          "content/wingcommander.wav",
+          "content/wingcommander.m4a",
+        ];
+
+        for (const src of sources) {
+          const audio = new Audio(src);
+          audio.loop = true;
+          audio.volume = warmup ? 0 : 1;
+          const started = await audio.play().then(
+            () => true,
+            () => false,
+          );
+          if (started) {
+            return { audio, src, warmedUp: warmup };
+          }
+        }
+
+        return null;
+      }
+
+      function delay(ms) {
+        return new Promise((resolve) => window.setTimeout(resolve, ms));
+      }
+
+      function playDosBeep() {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) {
+          return;
+        }
+
+        if (!state.beepAudioContext) {
+          state.beepAudioContext = new AudioCtx();
+        }
+
+        const ctx = state.beepAudioContext;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const durationSec = 0.5;
+
+        osc.type = "square";
+        osc.frequency.setValueAtTime(1000, now);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.08, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + durationSec);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + durationSec);
+      }
+
+      async function runWingCommanderStartupSequence(steps = runtimeConfig.wingCommanderStartup) {
+        for (const step of steps) {
+          if (
+            typeof step.text === "string" &&
+            step.text.toUpperCase().includes("EMS PAGE FRAME") &&
+            step.text.toUpperCase().includes("FAILED")
+          ) {
+            playDosBeep();
+          }
+          printLine(step.text, step.warn ? "warn" : "");
+          await delay(step.waitMs);
+        }
+      }
+
+      async function runRebootSequence(steps = runtimeConfig.rebootSequence) {
+        for (const step of steps) {
+          printLine(step.text, step.warn ? "warn" : "");
+          await delay(step.waitMs);
+        }
+      }
+
+      function getWingCommanderStartupSteps(himemLoaded) {
+        if (himemLoaded) {
+          return runtimeConfig.wingCommanderStartup;
+        }
+
+        let emsLineFound = false;
+        const failedSteps = [];
+        for (const step of runtimeConfig.wingCommanderStartup) {
+          if (typeof step.text === "string" && step.text.toUpperCase().includes("EMS PAGE FRAME")) {
+            emsLineFound = true;
+            let failedText = step.text.replace(/\bOK\b/i, "FAILED");
+            if (failedText === step.text) {
+              failedText = `${step.text} FAILED`;
+            }
+            failedSteps.push({
+              ...step,
+              text: failedText,
+              warn: true,
+            });
+            break;
+          }
+          failedSteps.push(step);
+        }
+
+        if (!emsLineFound) {
+          failedSteps.push({
+            text: "MEMCHK: EMS page frame (EMM386) ........ FAILED",
+            waitMs: 500,
+            warn: true,
+          });
+        }
+
+        return failedSteps;
+      }
+
+      async function showWingCommanderLogo(preparedAudio = null) {
+        state.wingCommanderMode = true;
+        terminal.innerHTML = "";
+        terminal.classList.add("fullscreen-media");
+
+        if (state.wingCommanderAudio) {
+          state.wingCommanderAudio.pause();
+          state.wingCommanderAudio = null;
+        }
+
+        const frame = document.createElement("div");
+        frame.className = "fullscreen-frame";
+
+        const image = document.createElement("img");
+        image.src = "content/wc_logo.jpg";
+        image.alt = "Wing Commander";
+        image.onerror = () => {
+          image.onerror = null;
+          image.src = "content/wc_logo.jpeg";
+        };
+        frame.appendChild(image);
+        terminal.appendChild(frame);
+
+        if (preparedAudio && preparedAudio.audio) {
+          preparedAudio.audio.volume = 1;
+          if (preparedAudio.audio.paused) {
+            await preparedAudio.audio.play().catch(() => {});
+          }
+          state.wingCommanderAudio = preparedAudio.audio;
+        } else {
+          const audioResult = await startWingCommanderAudio();
+          if (audioResult) {
+            state.wingCommanderAudio = audioResult.audio;
+          } else {
+            const note = document.createElement("div");
+            note.className = "media-note";
+            note.textContent = "Audio konnte nicht gestartet werden. Lege optional content/wingcommander.mp3 oder .ogg an.";
+            terminal.appendChild(note);
+          }
+        }
+
+        terminal.scrollTop = 0;
+      }
+
+      async function simulateReboot() {
+        if (state.wingCommanderAudio) {
+          state.wingCommanderAudio.pause();
+          state.wingCommanderAudio.currentTime = 0;
+          state.wingCommanderAudio = null;
+        }
+
+        state.wingCommanderMode = false;
+        state.pathSegments = [];
+        state.history = [];
+        state.historyIndex = -1;
+        state.currentInput = "";
+        state.cursorIndex = 0;
+        terminal.classList.remove("fullscreen-media");
+        terminal.innerHTML = "";
+
+        await runRebootSequence();
+
+        const now = new Date();
+        printLine("");
+        printLine(runtimeConfig.messages.bootVersionLine);
+        printLine(runtimeConfig.messages.bootCopyrightLine);
+        printLine("");
+        printLine(
+          formatTemplate(runtimeConfig.messages.bootStartTemplate, { date: formatDate(now), time: formatTime(now) }),
+        );
+        printLine(runtimeConfig.messages.bootHelpHint);
+        printLine("");
+      }
+
+      function getNodeBySegments(segments) {
+        let node = contentTree;
+        for (const segment of segments) {
+          node = node.directories[segment];
+          if (!node) {
+            return { directories: {}, files: [] };
+          }
+        }
+        return node;
+      }
+
+      function resolveDirectoryTarget(rawTarget) {
+        let target = rawTarget.trim().replaceAll("/", "\\");
+        if (!target || target === ".") {
+          return [...state.pathSegments];
+        }
+        if (target === "\\" || target.toUpperCase() === "C:" || target.toUpperCase() === "C:\\") {
+          return [];
+        }
+
+        let nextSegments = [...state.pathSegments];
+        if (target.toUpperCase().startsWith("C:\\")) {
+          nextSegments = [];
+          target = target.slice(3);
+        } else if (target.startsWith("\\")) {
+          nextSegments = [];
+          target = target.slice(1);
+        }
+
+        const parts = target.split("\\").filter(Boolean);
+        for (const part of parts) {
+          const normalized = part.toUpperCase();
+          if (normalized === ".") {
+            continue;
+          }
+          if (normalized === "..") {
+            if (nextSegments.length) {
+              nextSegments.pop();
+            }
+            continue;
+          }
+
+          const currentNode = getNodeBySegments(nextSegments);
+          if (!currentNode.directories[normalized]) {
+            return null;
+          }
+          nextSegments.push(normalized);
+        }
+
+        return nextSegments;
+      }
+
+      function resolveFileTarget(rawTarget) {
+        let target = rawTarget.trim().replaceAll("/", "\\");
+        if (!target || target.endsWith("\\")) {
+          return null;
+        }
+
+        let baseSegments = [...state.pathSegments];
+        if (target.toUpperCase().startsWith("C:\\")) {
+          baseSegments = [];
+          target = target.slice(3);
+        } else if (target.startsWith("\\")) {
+          baseSegments = [];
+          target = target.slice(1);
+        }
+
+        const parts = target.split("\\").filter(Boolean);
+        if (!parts.length) {
+          return null;
+        }
+
+        const filename = parts.pop().toUpperCase();
+        for (const part of parts) {
+          const normalized = part.toUpperCase();
+          if (normalized === ".") {
+            continue;
+          }
+          if (normalized === "..") {
+            if (baseSegments.length) {
+              baseSegments.pop();
+            }
+            continue;
+          }
+
+          const node = getNodeBySegments(baseSegments);
+          if (!node.directories[normalized]) {
+            return null;
+          }
+          baseSegments.push(normalized);
+        }
+
+        return { pathSegments: baseSegments, filename };
+      }
+
+      function setFileContent(pathSegments, filename, content) {
+        const entry = upsertFileEntry(pathSegments, filename);
+        entry.content = content;
+        entry.size = Math.max(1, content.length);
+        entry.path = null;
+        return entry;
+      }
+
+      function renderEditor() {
+        const editor = state.editor;
+        if (!editor) {
+          return;
+        }
+
+        const rows = Math.max(5, Math.floor(terminal.clientHeight / 24) - 3);
+        const width = Math.max(30, Math.floor(terminal.clientWidth / 11));
+        const desiredTop = Math.max(0, editor.cursorRow - Math.floor(rows / 2));
+        const maxTop = Math.max(0, editor.lines.length - rows);
+        editor.viewTop = Math.min(desiredTop, maxTop);
+
+        const title = formatTemplate(runtimeConfig.messages.editorTitleTemplate, { file: editor.filename });
+        const header = `[${title}${editor.dirty ? " *" : ""}]`;
+        const output = [header.slice(0, width).padEnd(width, " ")];
+
+        for (let i = 0; i < rows; i += 1) {
+          const lineIndex = editor.viewTop + i;
+          const rawLine = editor.lines[lineIndex] ?? "";
+          if (lineIndex === editor.cursorRow) {
+            const charIndex = Math.min(editor.cursorCol, rawLine.length);
+            const cursorChar = rawLine[charIndex] ?? " ";
+            const rendered = rawLine.slice(0, charIndex) + "_" + rawLine.slice(charIndex + (cursorChar === " " ? 0 : 1));
+            output.push(rendered.slice(0, width).padEnd(width, " "));
+          } else {
+            output.push(rawLine.slice(0, width).padEnd(width, " "));
+          }
+        }
+
+        output.push("=".repeat(width));
+        output.push(runtimeConfig.messages.editorHintLine.slice(0, width).padEnd(width, " "));
+        terminal.textContent = output.join("\n");
+      }
+
+      function openEditor(session) {
+        state.editor = {
+          ...session,
+          viewTop: 0,
+          dirty: false,
+        };
+        renderEditor();
+      }
+
+      function closeEditor(saved) {
+        const editor = state.editor;
+        if (!editor) {
+          return;
+        }
+
+        terminal.innerHTML = "";
+        terminal.classList.remove("fullscreen-media");
+        if (saved) {
+          printLine(formatTemplate(runtimeConfig.messages.editorSavedTemplate, { file: editor.filename }));
+        }
+        state.editor = null;
+        renderInputRow();
+      }
+
+      function saveEditor() {
+        const editor = state.editor;
+        if (!editor) {
+          return;
+        }
+        const content = editor.lines.join("\n");
+        setFileContent(editor.pathSegments, editor.filename, content);
+        editor.dirty = false;
+      }
+
+      function handleEditorKey(event) {
+        const editor = state.editor;
+        if (!editor) {
+          return false;
+        }
+
+        if (isMacBackslashShortcut(event)) {
+          event.preventDefault();
+          const line = editor.lines[editor.cursorRow];
+          editor.lines[editor.cursorRow] = line.slice(0, editor.cursorCol) + "\\" + line.slice(editor.cursorCol);
+          editor.cursorCol += 1;
+          editor.dirty = true;
+          renderEditor();
+          return true;
+        }
+
+        if (event.ctrlKey && event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          saveEditor();
+          renderEditor();
+          return true;
+        }
+        if (event.key === "F10") {
+          event.preventDefault();
+          saveEditor();
+          closeEditor(true);
+          return true;
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeEditor(false);
+          return true;
+        }
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          editor.cursorRow = Math.max(0, editor.cursorRow - 1);
+          editor.cursorCol = Math.min(editor.cursorCol, editor.lines[editor.cursorRow].length);
+          renderEditor();
+          return true;
+        }
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          editor.cursorRow = Math.min(editor.lines.length - 1, editor.cursorRow + 1);
+          editor.cursorCol = Math.min(editor.cursorCol, editor.lines[editor.cursorRow].length);
+          renderEditor();
+          return true;
+        }
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          if (editor.cursorCol > 0) {
+            editor.cursorCol -= 1;
+          } else if (editor.cursorRow > 0) {
+            editor.cursorRow -= 1;
+            editor.cursorCol = editor.lines[editor.cursorRow].length;
+          }
+          renderEditor();
+          return true;
+        }
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          const line = editor.lines[editor.cursorRow];
+          if (editor.cursorCol < line.length) {
+            editor.cursorCol += 1;
+          } else if (editor.cursorRow < editor.lines.length - 1) {
+            editor.cursorRow += 1;
+            editor.cursorCol = 0;
+          }
+          renderEditor();
+          return true;
+        }
+        if (event.key === "Home") {
+          event.preventDefault();
+          editor.cursorCol = 0;
+          renderEditor();
+          return true;
+        }
+        if (event.key === "End") {
+          event.preventDefault();
+          editor.cursorCol = editor.lines[editor.cursorRow].length;
+          renderEditor();
+          return true;
+        }
+        if (event.key === "Enter") {
+          event.preventDefault();
+          const line = editor.lines[editor.cursorRow];
+          const before = line.slice(0, editor.cursorCol);
+          const after = line.slice(editor.cursorCol);
+          editor.lines[editor.cursorRow] = before;
+          editor.lines.splice(editor.cursorRow + 1, 0, after);
+          editor.cursorRow += 1;
+          editor.cursorCol = 0;
+          editor.dirty = true;
+          renderEditor();
+          return true;
+        }
+        if (event.key === "Backspace") {
+          event.preventDefault();
+          if (editor.cursorCol > 0) {
+            const line = editor.lines[editor.cursorRow];
+            editor.lines[editor.cursorRow] = line.slice(0, editor.cursorCol - 1) + line.slice(editor.cursorCol);
+            editor.cursorCol -= 1;
+            editor.dirty = true;
+          } else if (editor.cursorRow > 0) {
+            const current = editor.lines[editor.cursorRow];
+            editor.cursorRow -= 1;
+            editor.cursorCol = editor.lines[editor.cursorRow].length;
+            editor.lines[editor.cursorRow] += current;
+            editor.lines.splice(editor.cursorRow + 1, 1);
+            editor.dirty = true;
+          }
+          renderEditor();
+          return true;
+        }
+        if (event.key === "Delete") {
+          event.preventDefault();
+          const line = editor.lines[editor.cursorRow];
+          if (editor.cursorCol < line.length) {
+            editor.lines[editor.cursorRow] = line.slice(0, editor.cursorCol) + line.slice(editor.cursorCol + 1);
+            editor.dirty = true;
+          } else if (editor.cursorRow < editor.lines.length - 1) {
+            editor.lines[editor.cursorRow] += editor.lines[editor.cursorRow + 1];
+            editor.lines.splice(editor.cursorRow + 1, 1);
+            editor.dirty = true;
+          }
+          renderEditor();
+          return true;
+        }
+        if (event.key === "Tab") {
+          event.preventDefault();
+          const line = editor.lines[editor.cursorRow];
+          editor.lines[editor.cursorRow] = line.slice(0, editor.cursorCol) + "  " + line.slice(editor.cursorCol);
+          editor.cursorCol += 2;
+          editor.dirty = true;
+          renderEditor();
+          return true;
+        }
+        if (event.key.length === 1 && !event.metaKey && !event.altKey && !event.ctrlKey) {
+          event.preventDefault();
+          const line = editor.lines[editor.cursorRow];
+          editor.lines[editor.cursorRow] = line.slice(0, editor.cursorCol) + event.key + line.slice(editor.cursorCol);
+          editor.cursorCol += 1;
+          editor.dirty = true;
+          renderEditor();
+          return true;
+        }
+
+        return false;
+      }
+
+      async function loadManifest() {
+        const response = await fetch("content/manifest.json", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error("manifest_missing");
+        }
+        const rawConfig = await response.json();
+        const filesystem = rawConfig.filesystem && typeof rawConfig.filesystem === "object" ? rawConfig.filesystem : rawConfig;
+        const executableExtensions = Array.isArray(rawConfig.executableExtensions)
+          ? rawConfig.executableExtensions
+              .filter((item) => typeof item === "string")
+              .map((item) => item.toUpperCase())
+          : [".EXE"];
+
+        return {
+          tree: normalizeTree(filesystem),
+          commands: normalizeCommands(rawConfig.commands),
+          messages: normalizeMessages(rawConfig.messages),
+          executableExtensions: executableExtensions.length ? executableExtensions : [".EXE"],
+          programs: normalizePrograms(rawConfig.programs),
+          wingCommanderStartup: normalizeWingCommanderStartup(rawConfig.wingCommanderStartup),
+          rebootSequence: normalizeRebootSequence(rawConfig.rebootSequence),
+        };
+      }
+
+      async function readContentFile(pathSegments, fileEntry) {
+        if (typeof fileEntry.content === "string") {
+          return fileEntry.content;
+        }
+
+        const relativePath = fileEntry.path || [...pathSegments, fileEntry.name].join("/");
+        const response = await fetch(`content/${relativePath}`, { cache: "no-store" });
+        if (!response.ok) {
+          return null;
+        }
+        return response.text();
+      }
+
+      function renderInputRow() {
+        if (state.wingCommanderMode) {
+          return;
+        }
+
+        const row = document.createElement("div");
+        row.className = "input-row";
+
+        const prompt = document.createElement("span");
+        prompt.className = "prompt";
+        prompt.textContent = `${getPromptPath()}>`;
+
+        const cmdBefore = document.createElement("span");
+        cmdBefore.className = "cmd-before";
+
+        const cursor = document.createElement("span");
+        cursor.className = "cursor";
+
+        const cmdAfter = document.createElement("span");
+        cmdAfter.className = "cmd-after";
+
+        row.append(prompt, cmdBefore, cursor, cmdAfter);
+        terminal.appendChild(row);
+        terminal.scrollTop = terminal.scrollHeight;
+        updateActiveInputRow();
+      }
+
+      function updateActiveInputRow() {
+        const before = terminal.querySelector(".input-row:last-of-type .cmd-before");
+        const after = terminal.querySelector(".input-row:last-of-type .cmd-after");
+        if (!before || !after) {
+          return;
+        }
+        before.textContent = state.currentInput.slice(0, state.cursorIndex);
+        after.textContent = state.currentInput.slice(state.cursorIndex);
+      }
+
+      function commitInputRow(row, command) {
+        row.remove();
+        printLine(`${getPromptPath()}>${command}`);
+      }
+
+      function formatDate(now) {
+        const d = now.getDate().toString().padStart(2, "0");
+        const m = (now.getMonth() + 1).toString().padStart(2, "0");
+        const y = now.getFullYear();
+        return `${d}.${m}.${y}`;
+      }
+
+      function formatTime(now) {
+        const h = now.getHours().toString().padStart(2, "0");
+        const min = now.getMinutes().toString().padStart(2, "0");
+        const sec = now.getSeconds().toString().padStart(2, "0");
+        return `${h}:${min}:${sec}`;
+      }
+
+      function isMacBackslashShortcut(event) {
+        return event.shiftKey && event.altKey && !event.ctrlKey && !event.metaKey && event.code === "Digit7";
+      }
+
+      async function handleCommand(rawInput) {
+        const input = rawInput.trim();
+        if (!input) {
+          return true;
+        }
+
+        const [command, ...args] = input.split(" ");
+        const cmd = command.toUpperCase();
+        const node = getCurrentNode();
+        const commandDefinition = runtimeConfig.commands[cmd];
+
+        // Undocumented debug shortcut: start Wing Commander instantly.
+        if (cmd === "WCGODMODE.EXE") {
+          await showWingCommanderLogo();
+          return true;
+        }
+
+        if (commandDefinition) {
+          switch (commandDefinition.action) {
+            case "help":
+              runtimeConfig.messages.helpLines.forEach((line) => printLine(line));
+              break;
+            case "clear":
+              terminal.innerHTML = "";
+              break;
+            case "date": {
+              const now = new Date();
+              printLine(formatTemplate(runtimeConfig.messages.dateTemplate, { date: formatDate(now) }));
+              break;
+            }
+            case "time": {
+              const now = new Date();
+              printLine(formatTemplate(runtimeConfig.messages.timeTemplate, { time: formatTime(now) }));
+              break;
+            }
+            case "version":
+              printLine(runtimeConfig.messages.versionLine);
+              break;
+            case "dir": {
+              printLine(formatTemplate(runtimeConfig.messages.dirHeaderTemplate, { path: getPromptPath() }));
+              printLine(runtimeConfig.messages.currentDirMarker);
+              if (state.pathSegments.length) {
+                printLine(runtimeConfig.messages.parentDirMarker);
+              }
+              Object.keys(node.directories)
+                .sort()
+                .forEach((name) => printLine(`${name.padEnd(14, " ")} <DIR>`));
+              node.files
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .forEach((entry) =>
+                  printLine(`${entry.name.padEnd(14, " ")}     ${entry.size.toLocaleString("de-DE")}`),
+                );
+              break;
+            }
+            case "cd": {
+              const target = args.join(" ");
+              if (!target) {
+                printLine(getPromptPath());
+                break;
+              }
+              const resolvedPath = resolveDirectoryTarget(target);
+              if (resolvedPath === null) {
+                printLine(runtimeConfig.messages.pathNotFound, "warn");
+                break;
+              }
+              state.pathSegments = resolvedPath;
+              break;
+            }
+            case "type": {
+              if (!args.length) {
+                printLine(runtimeConfig.messages.syntaxError, "warn");
+                break;
+              }
+              const filename = args.join(" ").toUpperCase();
+              const fileEntry = getFileEntry(node, filename);
+              if (!fileEntry) {
+                printLine(runtimeConfig.messages.fileNotFound, "warn");
+                break;
+              }
+              const content = await readContentFile(state.pathSegments, fileEntry);
+              if (content === null) {
+                printLine(runtimeConfig.messages.fileReadError, "warn");
+                break;
+              }
+              content.split("\n").forEach((line) => printLine(line.replace(/\r$/, "")));
+              break;
+            }
+            case "edit": {
+              if (!args.length) {
+                printLine(runtimeConfig.messages.syntaxError, "warn");
+                break;
+              }
+
+              const resolvedFile = resolveFileTarget(args.join(" "));
+              if (!resolvedFile) {
+                printLine(runtimeConfig.messages.pathNotFound, "warn");
+                break;
+              }
+
+              const editNode = getNodeBySegments(resolvedFile.pathSegments);
+              let fileEntry = getFileEntry(editNode, resolvedFile.filename);
+              let content = "";
+              if (fileEntry) {
+                const loadedContent = await readContentFile(resolvedFile.pathSegments, fileEntry);
+                if (loadedContent === null) {
+                  printLine(runtimeConfig.messages.fileReadError, "warn");
+                  break;
+                }
+                content = loadedContent;
+              } else {
+                fileEntry = upsertFileEntry(resolvedFile.pathSegments, resolvedFile.filename);
+                fileEntry.content = "";
+                fileEntry.size = 1;
+              }
+
+              openEditor({
+                filename: resolvedFile.filename,
+                pathSegments: resolvedFile.pathSegments,
+                lines: content.split("\n"),
+                cursorRow: 0,
+                cursorCol: 0,
+              });
+              break;
+            }
+            case "echo":
+              printLine(args.join(" "));
+              break;
+            case "reboot":
+              await simulateReboot();
+              break;
+            case "exit":
+              printLine(runtimeConfig.messages.sessionEnded, "warn");
+              window.removeEventListener("keydown", keyHandler);
+              return false;
+            default:
+              printLine(runtimeConfig.messages.invalidCommand, "warn");
+          }
+
+          return true;
+        }
+
+        const globalProgramOutput = getProgramOutputByCommand(cmd);
+        if (globalProgramOutput) {
+          globalProgramOutput.forEach((line) => printLine(line));
+          return true;
+        }
+
+        const executable = getFileEntry(node, cmd);
+        if (
+          executable &&
+          (executable.type === "exe" ||
+            runtimeConfig.executableExtensions.some((extension) => cmd.endsWith(extension)))
+        ) {
+          if (cmd === "WC.EXE" && state.pathSegments.join("\\") === "GAMES\\WINGCOMMANDER") {
+            const himemLoaded = await hasConfigLine(["DOS"], "CONFIG.SYS", "DEVICE=C:\\DOS\\HIMEM.SYS");
+            let preparedAudio = null;
+            if (himemLoaded) {
+              preparedAudio = await startWingCommanderAudio({ warmup: true });
+            }
+            state.wingCommanderMode = true;
+            await runWingCommanderStartupSequence(getWingCommanderStartupSteps(himemLoaded));
+            if (himemLoaded) {
+              await showWingCommanderLogo(preparedAudio);
+              return true;
+            }
+            if (preparedAudio && preparedAudio.audio) {
+              preparedAudio.audio.pause();
+              preparedAudio.audio.currentTime = 0;
+            }
+            state.wingCommanderMode = false;
+          }
+
+          if (executable.onExecute && executable.onExecute.length) {
+            executable.onExecute.forEach((line) => printLine(line, "warn"));
+            return true;
+          }
+          const programOutput = getProgramOutputByCommand(executable.name);
+          if (programOutput) {
+            programOutput.forEach((line) => printLine(line));
+            return true;
+          }
+          printLine(formatTemplate(runtimeConfig.messages.programNotRunnableTemplate, { name: cmd }), "warn");
+          return true;
+        }
+
+        printLine(runtimeConfig.messages.invalidCommand, "warn");
+        return true;
+      }
+
+      async function keyHandler(event) {
+        if (state.wingCommanderMode) {
+          event.preventDefault();
+          return;
+        }
+
+        if (state.editor) {
+          if (handleEditorKey(event)) {
+            return;
+          }
+          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+          }
+          return;
+        }
+
+        if (isMacBackslashShortcut(event)) {
+          event.preventDefault();
+          state.currentInput =
+            state.currentInput.slice(0, state.cursorIndex) + "\\" + state.currentInput.slice(state.cursorIndex);
+          state.cursorIndex += 1;
+          updateActiveInputRow();
+          return;
+        }
+
+        if (event.ctrlKey || event.metaKey || event.altKey) {
+          return;
+        }
+
+        if (event.key.length === 1) {
+          state.currentInput =
+            state.currentInput.slice(0, state.cursorIndex) +
+            event.key +
+            state.currentInput.slice(state.cursorIndex);
+          state.cursorIndex += 1;
+        } else if (event.key === "Backspace") {
+          if (state.cursorIndex > 0) {
+            state.currentInput =
+              state.currentInput.slice(0, state.cursorIndex - 1) +
+              state.currentInput.slice(state.cursorIndex);
+            state.cursorIndex -= 1;
+          }
+        } else if (event.key === "Delete") {
+          state.currentInput =
+            state.currentInput.slice(0, state.cursorIndex) +
+            state.currentInput.slice(state.cursorIndex + 1);
+        } else if (event.key === "Enter") {
+          const command = state.currentInput;
+          const row = terminal.querySelector(".input-row:last-of-type");
+          if (row) {
+            commitInputRow(row, command);
+          }
+
+          if (command.trim()) {
+            state.history.unshift(command);
+          }
+          state.historyIndex = -1;
+          state.currentInput = "";
+          state.cursorIndex = 0;
+
+          const keepSessionOpen = await handleCommand(command);
+          if (keepSessionOpen && !state.editor && !state.wingCommanderMode) {
+            renderInputRow();
+          }
+        } else if (event.key === "ArrowLeft") {
+          state.cursorIndex = Math.max(0, state.cursorIndex - 1);
+        } else if (event.key === "ArrowRight") {
+          state.cursorIndex = Math.min(state.currentInput.length, state.cursorIndex + 1);
+        } else if (event.key === "Home") {
+          state.cursorIndex = 0;
+        } else if (event.key === "End") {
+          state.cursorIndex = state.currentInput.length;
+        } else if (event.key === "ArrowUp") {
+          if (!state.history.length) return;
+          state.historyIndex = Math.min(state.historyIndex + 1, state.history.length - 1);
+          state.currentInput = state.history[state.historyIndex];
+          state.cursorIndex = state.currentInput.length;
+        } else if (event.key === "ArrowDown") {
+          if (!state.history.length) return;
+          state.historyIndex -= 1;
+          if (state.historyIndex < 0) {
+            state.historyIndex = -1;
+            state.currentInput = "";
+            state.cursorIndex = 0;
+          } else {
+            state.currentInput = state.history[state.historyIndex];
+            state.cursorIndex = state.currentInput.length;
+          }
+        } else if (event.key === "Tab") {
+          event.preventDefault();
+          printLine(runtimeConfig.messages.autocompleteUnavailable, "warn");
+        } else {
+          return;
+        }
+
+        event.preventDefault();
+        updateActiveInputRow();
+      }
+
+      async function boot() {
+        const now = new Date();
+        printLine(runtimeConfig.messages.bootVersionLine);
+        printLine(runtimeConfig.messages.bootCopyrightLine);
+        printLine("");
+        printLine(
+          formatTemplate(runtimeConfig.messages.bootStartTemplate, { date: formatDate(now), time: formatTime(now) }),
+        );
+        try {
+          const loadedManifest = await loadManifest();
+          contentTree = loadedManifest.tree;
+          runtimeConfig = {
+            messages: loadedManifest.messages,
+            commands: loadedManifest.commands,
+            executableExtensions: loadedManifest.executableExtensions,
+            programs: loadedManifest.programs,
+            wingCommanderStartup: loadedManifest.wingCommanderStartup,
+            rebootSequence: loadedManifest.rebootSequence,
+          };
+        } catch (_error) {
+          printLine(runtimeConfig.messages.manifestLoadError, "warn");
+          printLine(runtimeConfig.messages.manifestHint, "warn");
+          contentTree = { directories: {}, files: [] };
+        }
+        printLine(runtimeConfig.messages.bootHelpHint);
+        printLine("");
+        renderInputRow();
+      }
+
+      window.addEventListener("keydown", keyHandler);
+      terminal.addEventListener("click", () => terminal.focus());
+      terminal.focus();
+      boot();
+    </script>
+  </body>
 </html>

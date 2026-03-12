@@ -34,6 +34,28 @@ Es werden Fragen zu Spielen und Filmen, vor allem aus den 90er Jahren gestellt.
 - 90er Games & Film-Trivia
 - Anzahl Fragen und Inhalte über Markdown-Config
 
+Gothic 1:
+"Du? - Ich fress dich zum Frühstück Kleiner!"
+"Nichts wird so heiß gegessen, wie es gekocht wird."
+"Fleischwanzen Ragut alá Snuff, mit Reis und Pilzen."
+"Steck die scheiß Waffe weg! - Glück gehabt."
+"Verpiss dich!"
+
+Diablo 1:
+I sense a soul in search of answers...
+The darkness grows stronger beneath the cathedral ...
+Well, what can I do for ya?
+Hello, my friend. Stay awhile and listen...
+
+"Please, listen to me. The Archbishop Lazarus, he lead us down here to find the lost prince. The bastard lead us into a trap! Now everyone is dead... Killed by a Demon he called the Butcher. Avenge us! Find this Butcher and slay him, so that our souls may finally rest..."
+"Your death will be avenged!"
+
+Blade Movie:
+
+Fünftes Element:
+
+
+
 ### Sound & Musik
 
 Verwendet ausschließlich showweite Assets (siehe unten):
@@ -111,7 +133,10 @@ wird leiser gemischt wenn Crowd/Basti wählen.
 
 **Style of Music:**
 ```
-caribbean pirate ambient, gentle ocean waves against wooden hull, creaking ship timber, distant seagulls, subtle tension strings, nylon guitar, mysterious adventure atmosphere, Monkey Island inspired, loop-friendly, instrumental, 45 seconds
+caribbean pirate ambient, gentle ocean waves against wooden hull, creaking ship
+timber, distant seagulls, subtle tension strings, nylon guitar, mysterious
+adventure atmosphere, Monkey Island inspired, loop-friendly, instrumental, 45
+seconds
 ```
 
 **Struktur:**
