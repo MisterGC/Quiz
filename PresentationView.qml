@@ -231,11 +231,27 @@ Item {
         id: tensionMusic
         source: "sound/waiting_for_answers.mp3"
         loop: true
-        volume: root.game.answersRevealed && root.game.phase === "question" ? 1.0 : 0.0
+        volume: root.game.answersRevealed && root.game.phase === "question"
+                && root.game.currentMode !== "bouncer" ? 1.0 : 0.0
         onVolumeChanged: if (volume === 0 && root.game.phase !== "question") stop()
         Behavior on volume { NumberAnimation { duration: 1500 } }
 
         property bool shouldPlay: root.game.answersRevealed
+                                  && root.game.phase === "question"
+                                  && root.game.currentMode !== "bouncer"
+        onShouldPlayChanged: if (shouldPlay) play()
+    }
+
+    Music {
+        id: bouncerMusic
+        source: "sound/bouncer_loop.mp3"
+        loop: true
+        volume: root.game.currentMode === "bouncer"
+                && (root.game.phase === "question" || root.game.phase === "reveal") ? 1.0 : 0.0
+        onVolumeChanged: if (volume === 0 && root.game.currentMode !== "bouncer") stop()
+        Behavior on volume { NumberAnimation { duration: 1500 } }
+
+        property bool shouldPlay: root.game.currentMode === "bouncer"
                                   && root.game.phase === "question"
         onShouldPlayChanged: if (shouldPlay) play()
     }
@@ -452,6 +468,7 @@ Item {
         source: {
             switch (root.game.currentMode) {
             case "quiz":        return "PresentationQuiz.qml";
+            case "bouncer":     return "PresentationQuiz.qml";
             case "pirate-duel": return "PresentationQuiz.qml";
             case "taste":       return "PresentationTaste.qml";
             case "plank-duel":  return "PresentationPlankDuel.qml";
@@ -545,6 +562,93 @@ Item {
         SoundTodo {
             label: "Score tally sound"
             anchors { bottom: parent.bottom; right: parent.right; margins: 8 }
+        }
+    }
+
+    // --- Pre-Finale Screen (suspense "?") ---
+    Item {
+        id: preFinaleScreen
+        anchors.fill: parent
+        visible: root.game.phase === "preFinale"
+        opacity: visible ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 400 } }
+
+        Text {
+            id: preFinaleQ
+            anchors.centerIn: parent
+            text: "?"
+            color: root.gold
+            font { pixelSize: 200; bold: true; family: "monospace" }
+            transformOrigin: Item.Center
+
+            SequentialAnimation on scale {
+                loops: Animation.Infinite
+                NumberAnimation {
+                    to: 1.15; duration: 1500
+                    easing.type: Easing.InOutSine
+                }
+                NumberAnimation {
+                    to: 1.0; duration: 1500
+                    easing.type: Easing.InOutSine
+                }
+            }
+        }
+
+        // Glow behind "?"
+        Text {
+            anchors.centerIn: parent
+            text: "?"
+            color: root.gold
+            opacity: 0.2
+            scale: preFinaleQ.scale * 1.15
+            font: preFinaleQ.font
+        }
+    }
+
+    // --- Bonus Reveal Screen ---
+    Item {
+        id: bonusRevealScreen
+        anchors.fill: parent
+        visible: root.game.phase === "bonusReveal"
+        opacity: visible ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 400 } }
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 20
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "LEGENDARY & AWESOME BONUS"
+                color: root.gold
+                font { pixelSize: 32; bold: true; family: "monospace" }
+
+                SequentialAnimation on scale {
+                    loops: Animation.Infinite
+                    NumberAnimation {
+                        to: 1.06; duration: 1200
+                        easing.type: Easing.InOutSine
+                    }
+                    NumberAnimation {
+                        to: 1.0; duration: 1200
+                        easing.type: Easing.InOutSine
+                    }
+                }
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "+10.000"
+                color: "#ffffff"
+                font { pixelSize: 120; bold: true; family: "monospace" }
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "FÜR BASTI"
+                color: root.gold
+                font { pixelSize: 28; bold: true; family: "monospace" }
+            }
         }
     }
 
@@ -642,6 +746,161 @@ Item {
         SoundTodo {
             label: "Victory / end music"
             anchors { bottom: parent.bottom; right: parent.right; margins: 8 }
+        }
+    }
+
+    // --- Outro Screen (title variant + outro music) ---
+    Item {
+        id: outroScreen
+        anchors.fill: parent
+        visible: root.game.phase === "outro"
+        opacity: visible ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 400 } }
+
+        // Marquee light frame (reused from title)
+        Item {
+            id: outroMarquee
+            width: Math.min(parent.width * 0.8, 560)
+            height: 170
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: -30
+
+            property int chasePos: 0
+            property int totalLights: 52
+
+            Timer {
+                running: outroScreen.visible
+                interval: 55
+                repeat: true
+                onTriggered: outroMarquee.chasePos =
+                    (outroMarquee.chasePos + 1) % outroMarquee.totalLights
+            }
+
+            Repeater {
+                model: outroMarquee.totalLights
+
+                Rectangle {
+                    width: 8; height: 8; radius: 4
+
+                    property real perim: 2 * (outroMarquee.width + outroMarquee.height)
+                    property real pos: index / outroMarquee.totalLights * perim
+
+                    x: {
+                        var w = outroMarquee.width, h = outroMarquee.height;
+                        if (pos < w) return pos - 4;
+                        if (pos < w + h) return w - 4;
+                        if (pos < 2 * w + h) return 2 * w + h - pos - 4;
+                        return -4;
+                    }
+                    y: {
+                        var w = outroMarquee.width, h = outroMarquee.height;
+                        if (pos < w) return -4;
+                        if (pos < w + h) return pos - w - 4;
+                        if (pos < 2 * w + h) return h - 4;
+                        return 2 * w + 2 * h - pos - 4;
+                    }
+
+                    property int dist: {
+                        var d = Math.abs(index - outroMarquee.chasePos);
+                        var half = Math.floor(outroMarquee.totalLights / 2);
+                        return d > half ? outroMarquee.totalLights - d : d;
+                    }
+
+                    color: dist < 5 ? root.gold : (index % 2 === 0 ? "#333355" : "#222240")
+                    opacity: dist < 5 ? (1.0 - dist * 0.15) : 0.4
+
+                    Behavior on color { ColorAnimation { duration: 80 } }
+                    Behavior on opacity { NumberAnimation { duration: 80 } }
+                }
+            }
+
+            // Title text (centered in frame)
+            Column {
+                anchors.centerIn: parent
+                spacing: 2
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: root.game.quizTitlePrefix.toUpperCase()
+                    color: root.gold
+                    font { pixelSize: 26; bold: true; family: "monospace" }
+                }
+
+                Item {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: outroTitleText.width; height: outroTitleText.height
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: outroTitleText.text
+                        color: root.gold
+                        opacity: 0.25
+                        scale: outroTitleText.scale * 1.08
+                        font: outroTitleText.font
+                    }
+
+                    Text {
+                        id: outroTitleText
+                        anchors.centerIn: parent
+                        text: root.game.quizTitleName.toUpperCase()
+                        color: "#ffffff"
+                        font { pixelSize: 72; bold: true; family: "monospace" }
+
+                        SequentialAnimation on scale {
+                            loops: Animation.Infinite
+                            NumberAnimation {
+                                to: 1.04; duration: 2000
+                                easing.type: Easing.InOutSine
+                            }
+                            NumberAnimation {
+                                to: 1.0; duration: 2000
+                                easing.type: Easing.InOutSine
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: outroMarquee.bottom
+            anchors.topMargin: 20
+            text: "~ " + root.game.quizSubtitle + " ~"
+            color: root.gold
+            font { pixelSize: 20; italic: true; family: "monospace" }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: outroMarquee.bottom
+            anchors.topMargin: 56
+            text: "DANKE FÜRS MITSPIELEN!"
+            color: "#88ffffff"
+            font { pixelSize: 18; bold: true; family: "monospace" }
+
+            SequentialAnimation on opacity {
+                loops: Animation.Infinite
+                NumberAnimation { to: 0.3; duration: 1200 }
+                NumberAnimation { to: 1.0; duration: 1200 }
+            }
+        }
+
+        Music {
+            id: outroMusic
+            source: "sound/outro_song.mp3"
+            loop: false
+            volume: outroScreen.visible ? 1.0 : 0.0
+            onVolumeChanged: if (volume === 0 && !outroScreen.visible) stop()
+            Behavior on volume { NumberAnimation { duration: 1500 } }
+        }
+
+        Connections {
+            target: root.game
+            function onPhaseChanged() {
+                if (root.game.phase === "outro") outroMusic.play();
+            }
         }
     }
 }

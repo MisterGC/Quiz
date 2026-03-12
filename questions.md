@@ -70,6 +70,38 @@
 
 ---
 
+## Du kommst hier nicht rein! Oder doch?
+> Du möchtest heute im Babylon auf der Deep-Space-Night tanzen, bist aber noch zu jung. Du leihst dir den Führerschein eines volljährigen Freundes. Bereite dich auf Fragen des Türstehers vor.
+> Sponsor: Gesponsert vom Babylon Nightclub — Einlass ab 18!
+> Type: bouncer
+> Music: bouncer_loop.mp3
+
+### "Wie heißt du?"
+- [ ] Basti Rampf
+- [ ] Hans Lüt
+- [x] Hannes Litt
+- [ ] Hannes Lit
+
+### "Wo bist du geboren?"
+- [ ] Starnberg
+- [x] Flensburg
+- [ ] München
+- [ ] Friedrichshafen
+
+### "Welches Sternzeichen hast du?"
+- [ ] Affe
+- [x] Zwilling
+- [ ] Fisch
+- [ ] Steinbock
+
+### "Fälscher-Bonus: Was hast du verwendet, um den Dienststempel nachzuzeichnen? Folienstift und ..."
+- [ ] Flaschenverschluss
+- [x] Booster-Dose
+- [ ] 50-Pfennig Stück
+- [ ] Den Gummiball einer alten Maus
+
+---
+
 ## Duell auf der Affeninsel
 > Du kämpfst wie eine Kuh.
 > Sponsor: Gesponsert von Stans Gebrauchtschiff-Handel — Keine Rückgabe!

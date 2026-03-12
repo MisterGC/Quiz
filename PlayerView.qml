@@ -108,6 +108,7 @@ Item {
                          && root.game.currentMode !== "taste"
                          && root.game.currentMode !== "singing"
                          && root.game.currentMode !== "dos-console"
+                         && !(root.game.currentMode === "bouncer" && root.playerIndex === 1)
 
                 Repeater {
                     model: root.game.answersRevealed ? 4 : 0
@@ -227,10 +228,13 @@ Item {
                 anchors.centerIn: parent
                 visible: root.game.phase === "question"
                          && (root.game.currentMode === "singing"
-                             || root.game.currentMode === "dos-console")
-                text: root.game.currentMode === "singing"
-                      ? "Mods vergeben\nPunkte"
-                      : "Solo-Runde"
+                             || root.game.currentMode === "dos-console"
+                             || (root.game.currentMode === "bouncer" && root.playerIndex === 1))
+                text: {
+                    if (root.game.currentMode === "bouncer") return "Macht Basti\nalles richtig?";
+                    if (root.game.currentMode === "singing") return "Mods vergeben\nPunkte";
+                    return "Solo-Runde";
+                }
                 color: "#666666"
                 font { pixelSize: 12; family: "monospace" }
                 horizontalAlignment: Text.AlignHCenter
@@ -361,6 +365,7 @@ Item {
                 anchors.centerIn: parent
                 spacing: 8
                 visible: root.game.phase === "reveal"
+                         && !(root.game.currentMode === "bouncer" && root.playerIndex === 1)
 
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -380,6 +385,18 @@ Item {
                     color: root.gold
                     font { pixelSize: 16; bold: true; family: "monospace" }
                 }
+            }
+
+            // --- Bouncer: Player 2 passive text during reveal ---
+            Text {
+                anchors.centerIn: parent
+                visible: root.game.phase === "reveal"
+                         && root.game.currentMode === "bouncer"
+                         && root.playerIndex === 1
+                text: "Macht Basti\nalles richtig?"
+                color: "#666666"
+                font { pixelSize: 12; family: "monospace" }
+                horizontalAlignment: Text.AlignHCenter
             }
 
             // --- Finale phase ---

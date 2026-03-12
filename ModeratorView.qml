@@ -201,6 +201,7 @@ Item {
                 source: {
                     switch (root.game.currentMode) {
                     case "quiz":        return "ModeratorQuiz.qml";
+                    case "bouncer":     return "ModeratorQuiz.qml";
                     case "pirate-duel": return "ModeratorQuiz.qml";
                     case "taste":       return "ModeratorTaste.qml";
                     case "plank-duel":  return "ModeratorPlankDuel.qml";
@@ -241,7 +242,7 @@ Item {
                     Text {
                         anchors.centerIn: parent
                         text: root.game.currentRound + 1 < root.game.totalRounds
-                              ? "Nächste Runde" : "Endergebnis"
+                              ? "Nächste Runde" : "Zum Finale"
                         color: "#ffffff"
                         font { pixelSize: 16; bold: true; family: "monospace" }
                     }
@@ -249,6 +250,77 @@ Item {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: root.game.advanceFromScoreboard()
+                    }
+                }
+            }
+
+            // --- Pre-Finale phase ---
+            Column {
+                anchors.centerIn: parent
+                spacing: 12
+                visible: root.game.phase === "preFinale"
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Suspense ..."
+                    color: "#cccccc"
+                    font { pixelSize: 14; family: "monospace" }
+                }
+
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: 160; height: 44; radius: 6
+                    color: root.gold
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Bonus!"
+                        color: "#1a1a2e"
+                        font { pixelSize: 16; bold: true; family: "monospace" }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.game.revealBonus()
+                    }
+                }
+            }
+
+            // --- Bonus Reveal phase ---
+            Column {
+                anchors.centerIn: parent
+                spacing: 12
+                visible: root.game.phase === "bonusReveal"
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Bonus vergeben!"
+                    color: root.gold
+                    font { pixelSize: 14; bold: true; family: "monospace" }
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "S1: " + root.game.player1Score
+                          + "  S2: " + root.game.player2Score
+                    color: root.gold
+                    font { pixelSize: 14; bold: true; family: "monospace" }
+                }
+
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: 160; height: 44; radius: 6
+                    color: "#2a4a8a"
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Ergebnis"
+                        color: "#ffffff"
+                        font { pixelSize: 16; bold: true; family: "monospace" }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.game.showFinale()
                     }
                 }
             }
@@ -262,6 +334,38 @@ Item {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Spiel vorbei"
+                    color: "#cccccc"
+                    font { pixelSize: 14; family: "monospace" }
+                }
+
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: 160; height: 44; radius: 6
+                    color: "#2a4a8a"
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Outro"
+                        color: "#ffffff"
+                        font { pixelSize: 16; bold: true; family: "monospace" }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.game.startOutro()
+                    }
+                }
+            }
+
+            // --- Outro phase ---
+            Column {
+                anchors.centerIn: parent
+                spacing: 12
+                visible: root.game.phase === "outro"
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Outro läuft"
                     color: "#cccccc"
                     font { pixelSize: 14; family: "monospace" }
                 }

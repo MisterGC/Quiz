@@ -50,7 +50,8 @@ Item {
 
     // ======= Game state =======
     property bool musicStarted: false
-    // Phases: title|roundIntro|question|reveal|scoreboard|finale
+    property bool bonusAwarded: false
+    // Phases: title|roundIntro|question|reveal|scoreboard|preFinale|bonusReveal|finale|outro
     //         |singingActive|singingReveal
     //         |duelPick|duelCounter|duelResult
     //         |console|consoleResult
@@ -221,7 +222,8 @@ Item {
             insultChoices: insultChoices,
             chosenInsultIdx: chosenInsultIdx,
             duelWinner: duelWinner,
-            connectedRoles: connectedRoles
+            connectedRoles: connectedRoles,
+            bonusAwarded: bonusAwarded
         };
     }
 
@@ -257,6 +259,7 @@ Item {
         if (s.chosenInsultIdx !== undefined) chosenInsultIdx = s.chosenInsultIdx;
         if (s.duelWinner !== undefined) duelWinner = s.duelWinner;
         if (s.connectedRoles !== undefined) connectedRoles = s.connectedRoles;
+        if (s.bonusAwarded !== undefined) bonusAwarded = s.bonusAwarded;
         // Recompute currentDuelData from synced indices
         if (chosenInsultIdx >= 0 && currentRoundData) {
             var qs = currentRoundData.questions;
@@ -354,6 +357,15 @@ Item {
         case "advanceFromBlitzSummary":
             if (senderRole === "mod") advanceFromBlitzSummary();
             break;
+        case "revealBonus":
+            if (senderRole === "mod") revealBonus();
+            break;
+        case "showFinale":
+            if (senderRole === "mod") showFinale();
+            break;
+        case "startOutro":
+            if (senderRole === "mod") startOutro();
+            break;
         }
     }
 
@@ -436,6 +448,10 @@ Item {
         answersRevealed = false;
         lastRoast = "";
 
+        if (currentMode === "bouncer") {
+            player2Locked = true;
+        }
+
         if (currentMode === "taste") {
             if (currentQuestion <= 2)      timerMax = 100;
             else if (currentQuestion <= 5) timerMax = 70;
@@ -466,6 +482,7 @@ Item {
         }
         if (!answersRevealed || (phase !== "question" && phase !== "blitzPair")) return;
         if (!timerRunning && timerValue <= 0) return;
+        if (currentMode === "bouncer" && playerIndex === 1) return;
 
         if (playerIndex === 0 && !player1Locked) {
             player1Answer = answerIndex;
@@ -869,8 +886,31 @@ Item {
             currentRound++;
             phase = "roundIntro";
         } else {
-            phase = "finale";
+            phase = "preFinale";
         }
+        _broadcastGameState();
+    }
+
+    function revealBonus() {
+        if (isClient) { _sendCommand({action: "revealBonus"}); return; }
+        if (phase !== "preFinale") return;
+        player1Score += 10000;
+        bonusAwarded = true;
+        phase = "bonusReveal";
+        _broadcastGameState();
+    }
+
+    function showFinale() {
+        if (isClient) { _sendCommand({action: "showFinale"}); return; }
+        if (phase !== "bonusReveal") return;
+        phase = "finale";
+        _broadcastGameState();
+    }
+
+    function startOutro() {
+        if (isClient) { _sendCommand({action: "startOutro"}); return; }
+        if (phase !== "finale") return;
+        phase = "outro";
         _broadcastGameState();
     }
 
@@ -904,6 +944,7 @@ Item {
         duelWinner = "";
         scenarioSolved = false;
         blitzResults = [];
+        bonusAwarded = false;
         phase = "title";
         _broadcastGameState();
     }
