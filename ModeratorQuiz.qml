@@ -52,6 +52,50 @@ Item {
             }
         }
 
+        // All answers for moderator to read aloud
+        Column {
+            width: parent.width - 10
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 4
+            visible: !root.game.answersRevealed
+                     && (root.game.currentMode === "quiz"
+                         || root.game.currentMode === "bouncer")
+
+            Repeater {
+                model: root.game.currentQuestionData
+                       ? root.game.currentQuestionData.answers : []
+                Rectangle {
+                    required property int index
+                    required property string modelData
+                    width: parent.width
+                    height: ansLabel.height + 10
+                    radius: 4
+                    color: index === root.game.currentQuestionData.correct
+                           ? "#1a3a1a" : "#1a1a1a"
+                    border.color: index === root.game.currentQuestionData.correct
+                                  ? "#00e676" : "#333333"
+                    border.width: 1
+
+                    Text {
+                        id: ansLabel
+                        anchors.centerIn: parent
+                        width: parent.width - 12
+                        text: {
+                            var labels = root.game.currentRoundData
+                                         && (root.game.currentRoundData.mode === "pirate-duel"
+                                             || root.game.currentRoundData.mode === "plank-duel")
+                                         ? ["1", "2", "3", "4"] : ["A", "B", "C", "D"];
+                            return labels[index] + ": " + modelData;
+                        }
+                        color: index === root.game.currentQuestionData.correct
+                               ? "#00e676" : "#888888"
+                        font { pixelSize: 11; family: "monospace" }
+                        wrapMode: Text.WordWrap
+                    }
+                }
+            }
+        }
+
         // Before answers shown: "Show Answers" button
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
