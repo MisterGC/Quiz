@@ -46,16 +46,70 @@ Questions are defined in `QuestionData.js`. Each round has:
 
 ## How to Run
 
-### WebDojo (via clay-dev-server)
+### Start the servers
+
 ```bash
-clay-dev-server /Users/mistergc/dev/gamedev/quiz/Game.qml
-# Open http://localhost:8090
+# Terminal 1 — QML dev server (serves quiz files)
+clay-dev-server /path/to/quiz
+
+# Terminal 2 — WebDojo (serves the WASM runtime)
+cd /path/to/clayground/docs && python3 scripts/serve_dev.py
 ```
 
-### Desktop (via claydojo)
-```bash
-./build/bin/claydojo --sbx /Users/mistergc/dev/gamedev/quiz/Game.qml
+Both servers use HTTPS with auto-generated self-signed certificates.
+
+## LAN / Multi-Device Setup
+
+By default the app runs in **standalone** mode — all views side by side in one
+window. For multi-device play, each device takes a different role.
+
+### Online Mode (all browsers, needs internet)
+
+All devices open the WebDojo with their role. PeerJS cloud handles signaling.
+
 ```
+# Host / Big Screen
+https://<hostname>:8000/webdojo?src=https://<hostname>:8090/Game.qml#role=presentation
+
+# Moderator
+https://<hostname>:8000/webdojo?src=https://<hostname>:8090/Game.qml#role=mod
+
+# Player 1 / Player 2
+https://<hostname>:8000/webdojo?src=https://<hostname>:8090/Game.qml#role=basti
+https://<hostname>:8000/webdojo?src=https://<hostname>:8090/Game.qml#role=dacrowd
+```
+
+### Offline LAN Mode (no internet required)
+
+Desktop host (claydojo) + browser clients on tablets. The clay-dev-server
+provides a built-in PeerJS signaling relay so no internet is needed.
+
+```bash
+# Terminal 1 — QML dev server + signaling relay
+clay-dev-server /path/to/quiz
+
+# Terminal 2 — WebDojo
+cd /path/to/clayground/docs && python3 scripts/serve_dev.py
+
+# Desktop host (presentation)
+claydojo --sbx /path/to/quiz/Game.qml \
+  --arg role=presentation \
+  --arg signaling=wss://<hostname>:8090/peerjs
+
+# Browser clients (tablets)
+https://<hostname>:8000/webdojo?src=https://<hostname>:8090/Game.qml#role=mod&signaling=wss://<hostname>:8090/peerjs
+https://<hostname>:8000/webdojo?src=https://<hostname>:8090/Game.qml#role=basti&signaling=wss://<hostname>:8090/peerjs
+https://<hostname>:8000/webdojo?src=https://<hostname>:8090/Game.qml#role=dacrowd&signaling=wss://<hostname>:8090/peerjs
+```
+
+Replace `<hostname>` with the machine's LAN hostname or IP address.
+
+**Join flow:** The host shows a join code on screen. Clients enter this code to
+connect (or pass `#session=XYZ` in the URL to join automatically).
+
+**Self-signed certificates:** On first access per device, visit both
+`https://<hostname>:8000` and `https://<hostname>:8090` directly in the browser
+and accept the certificate warning. After that the WebDojo role URLs will work.
 
 ## TODO
 
@@ -71,8 +125,3 @@ Every screen that needs audio has a `♫ TODO` badge. Sounds needed:
 - Lock-in confirmation beep (player answers)
 - UI click feedback (moderator buttons)
 - Ambient lobby loop (player waiting)
-
-### Networking
-Currently all views share state in a single process. For multi-device play
-(e.g. phones as player controllers), replace shared properties with
-`clay_network` P2P sync.
