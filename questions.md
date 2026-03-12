@@ -2,8 +2,8 @@
 > Eine Retro Quizshow
 > Music: title_theme.mp3
 
-## 90er-Spiele-Wissen
-> Wie gut erinnerst du dich WIRKLICH an die goldene Ära?
+## Flimmerkiste & Pixelwahn
+> Filme, Fernsehen und Zocken — wie gut erinnerst du dich WIRKLICH?
 > Sponsor: Präsentiert von Bonzi Buddy™ — Dein Desktop-Kumpel!
 > Type: quiz
 > Music: round1_jingle.mp3
@@ -49,6 +49,24 @@
 - [ ] Liero
 - [ ] Scorched Earth
 > Das sind keine Vögel, Genie. Das sind Wirbellose.
+
+### Korben und Leeloo sitzen in einem Taxi und geraten in eine Polizeikontrolle — was sagt Leeloo?
+- [ ] Globalpass
+- [x] Multipass
+- [ ] Omnipass
+- [ ] Flexipass
+> Hint: Leeloo zeigt ihren "Multipass" stolz bei jeder Gelegenheit — besonders unvergesslich die Szene, in der sie ihn den Polizisten immer wieder unter die Nase hält, während Korben genervt "she knows it's a Multipass" wiederholt.
+> Hint: Das fünfte Element (1997, Luc Besson) vereinte Bruce Willis als Taxifahrer Korben Dallas und Milla Jovovich als Leeloo — das Supreme Being, geschaffen um die Welt vor dem absoluten Bösen zu retten.
+> Hint: Milla Jovovich lernte für die Rolle eine eigene "göttliche Sprache" mit rund 400 Wörtern, die Luc Besson zusammen mit ihr entwickelte. Die beiden kommunizierten am Set teilweise in dieser Sprache.
+
+### Round One Fight!? Was trifft NICHT auf Virtua Fighter zu?
+- [x] Erschien als Arcade-Automat wenige Monate nach dem 1. Teil von Tekken
+- [ ] Jeder Charakter beherrscht eine reale Kampfkunst — Akira Yuki z.B. Bajiquan
+- [ ] Es gab nur 8 spielbare Charaktere plus einen geheimen Endgegner namens Dural
+- [ ] Der Saturn-Port war Launch-Titel in Japan und die 200.000 Konsolen waren am ersten Tag ausverkauft
+> Hint: Virtua Fighter erschien im Dezember 1993 — ein ganzes Jahr VOR Tekken (Dezember 1994). Es war tatsächlich das erste 3D-Polygon-Kampfspiel überhaupt, nicht umgekehrt.
+> Hint: Yu Suzuki (Sega AM2) reiste persönlich nach China, um echte Kampfkünste zu studieren. Jeder der 8 Charaktere beherrscht einen realen Kampfstil — Akira Yuki z.B. Bajiquan (八極拳), eine explosive chinesische Nahkampfkunst. Dural, der geheime Endgegner, ist eine metallische Figur die alle Stile kombiniert.
+> Hint: Der Saturn-Port verkaufte sich in Japan nahezu 1:1 mit der Konsole — Segas initiale 200.000 Einheiten waren am ersten Tag ausverkauft. Virtua Fighter rettete damit praktisch den Saturn-Launch in Japan.
 
 ---
 
