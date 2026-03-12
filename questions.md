@@ -8,19 +8,24 @@
 > Type: quiz
 > Music: round1_jingle.mp3
 
-### Welcher Multiplayer-Charakter war in 'GoldenEye 007' für N64 berühmt dafür, zu klein zum Treffen zu sein?
-- [ ] Jaws
-- [x] Oddjob
-- [ ] Baron Samedi
-- [ ] Natalya
-> Selbst Oddjob ist enttäuscht von dir.
+### Was trifft NICHT auf Diablo 1 zu?
+- [ ] Es war ursprünglich als rundenbasiertes Spiel konzipiert
+- [ ] Die Entwicklung wurde nicht von Blizzard begonnen
+- [x] Das Entwicklungsteam bestand aus nur 10 Personen
+- [ ] Ein Footballspiel hat entscheidend zur Entstehung beigetragen
+> Selbst der Metzger weiß mehr über Tristram als du.
+> Hint: David Brevik pitchte Diablo 1994 als rundenbasiertes Roguelike — Blizzard überzeugte ihn, es in Echtzeit umzusetzen.
+> Hint: Entwickelt wurde es von Condor Inc. (gegründet von Brevik und den Schaefer-Brüdern). Blizzard kaufte Condor 1996 und benannte es in Blizzard North um.
+> Hint: Das Team war nicht 10 sondern etwa 15 Leute — und die finanzierten sich durch Handheld-Versionen von NFL Quarterback Club für Acclaim. Ein separater Football-Deal mit 3DO hielt den Laden am Laufen, während Diablo entstand.
 
-### Wie lautete der Cheatcode bei 'Die Sims', um unbegrenzt Geld zu bekommen?
-- [ ] motherlode
-- [x] rosebud
-- [ ] kaching
-- [ ] hesoyam
-> Dein Kontostand: auch nur eine Simulation.
+### Du bist namenlos, mittellos und wirst in eine Minenkollonie in einer magischen Kuppel geworfen — was hörst du dort vermutlich NICHT?
+- [ ] "Du? - Ich fress dich zum Frühstück Kleiner!"
+- [x] "Der Schläfer hat verpennt!"
+- [ ] "Nichts wird so heiß gegessen, wie es gekocht wird."
+- [ ] "Steck die scheiß Waffe weg! - Glück gehabt."
+> Hint: Der Schläfer ist ein uralter Dämon, gefangen unter der Minenkolonie. Die Bruderschaft des Schläfers im Sumpflager betet ihn an — Guru Y'Berion versucht, ihn durch ein Ritual zu erwecken.
+> Hint: Am Ende von Gothic 1 erwacht der Schläfer tatsächlich — der Namenlose Held muss ihn in der Tiefe besiegen. "Verpennt" hat er also definitiv nicht.
+> Hint: Gothic 1 (2001, Piranha Bytes) war ein deutsches RPG-Meisterwerk — bekannt für seine lebendige Spielwelt, in der NPCs eigene Tagesabläufe hatten und auf gezogene Waffen aggressiv reagierten.
 
 ### In welchem 90er-Spiel hieß der Protagonist 'Guybrush Threepwood'?
 - [ ] Day of the Tentacle

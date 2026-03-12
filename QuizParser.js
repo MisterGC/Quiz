@@ -153,9 +153,13 @@ function parse(markdown) {
             continue;
         }
 
-        // Roast blockquote (after answers)
+        // Blockquote after answers (roast or hint)
         if (currentQuestion && line.match(/^> /) && currentQuestion.answers.length > 0) {
-            currentQuestion.roast = line.replace(/^> /, "").trim();
+            var bqVal = line.replace(/^> /, "").trim();
+            if (bqVal.match(/^Hint:\s*/i))
+                currentQuestion.hints.push(bqVal.replace(/^Hint:\s*/i, ""));
+            else if (!currentQuestion.roast)
+                currentQuestion.roast = bqVal;
             i++;
             continue;
         }

@@ -117,79 +117,109 @@ Item {
     }
 
     // --- Reveal phase ---
-    Column {
-        anchors.centerIn: parent
-        spacing: 8
+    Flickable {
+        anchors.fill: parent
+        contentWidth: width
+        contentHeight: revealCol.height
+        clip: true
         visible: root.game.phase === "reveal"
-        width: parent.width - 20
 
-        // Player 1 result
-        Text {
+        Column {
+            id: revealCol
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "S1: " + (root.game.player1Correct ? "RICHTIG!" : "FALSCH!")
-                  + (root.game.player1PointsEarned > 0
-                     ? " +" + root.game.player1PointsEarned + " Pkt." : "")
-            color: root.game.player1Correct ? "#00e676" : "#ff1744"
-            font { pixelSize: 12; bold: true; family: "monospace" }
-        }
+            spacing: 8
+            width: parent.width - 20
 
-        // Player 2 result
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "S2: " + (root.game.player2Correct ? "RICHTIG!" : "FALSCH!")
-                  + (root.game.player2PointsEarned > 0
-                     ? " +" + root.game.player2PointsEarned + " Pkt." : "")
-            color: root.game.player2Correct ? "#00e676" : "#ff1744"
-            font { pixelSize: 12; bold: true; family: "monospace" }
-        }
-
-        // Roast text (moderator only)
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width - 10
-            height: roastText.height + 12
-            radius: 6
-            color: "#2a2a1a"
-            border.color: root.gold
-            border.width: 1
-            visible: root.game.lastRoast !== ""
-
+            // Player 1 result
             Text {
-                id: roastText
-                anchors.centerIn: parent
-                width: parent.width - 12
-                text: root.game.lastRoast
-                color: root.gold
-                font { pixelSize: 12; italic: true; family: "monospace" }
-                wrapMode: Text.WordWrap
-                horizontalAlignment: Text.AlignHCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "S1: " + (root.game.player1Correct ? "RICHTIG!" : "FALSCH!")
+                      + (root.game.player1PointsEarned > 0
+                         ? " +" + root.game.player1PointsEarned + " Pkt." : "")
+                color: root.game.player1Correct ? "#00e676" : "#ff1744"
+                font { pixelSize: 12; bold: true; family: "monospace" }
             }
-        }
 
-        // Scores
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "S1: " + root.game.player1Score
-                  + "  S2: " + root.game.player2Score
-            color: "#cccccc"
-            font { pixelSize: 12; family: "monospace" }
-        }
-
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: 160; height: 44; radius: 6
-            color: "#2a4a8a"
-
+            // Player 2 result
             Text {
-                anchors.centerIn: parent
-                text: "Weiter"
-                color: "#ffffff"
-                font { pixelSize: 16; bold: true; family: "monospace" }
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "S2: " + (root.game.player2Correct ? "RICHTIG!" : "FALSCH!")
+                      + (root.game.player2PointsEarned > 0
+                         ? " +" + root.game.player2PointsEarned + " Pkt." : "")
+                color: root.game.player2Correct ? "#00e676" : "#ff1744"
+                font { pixelSize: 12; bold: true; family: "monospace" }
             }
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.game.nextStep()
+
+            // Roast text (moderator only)
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width - 10
+                height: roastText.height + 12
+                radius: 6
+                color: "#2a2a1a"
+                border.color: root.gold
+                border.width: 1
+                visible: root.game.lastRoast !== ""
+
+                Text {
+                    id: roastText
+                    anchors.centerIn: parent
+                    width: parent.width - 12
+                    text: root.game.lastRoast
+                    color: root.gold
+                    font { pixelSize: 12; italic: true; family: "monospace" }
+                    wrapMode: Text.WordWrap
+                    horizontalAlignment: Text.AlignHCenter
+                }
+            }
+
+            // Moderator hints
+            Column {
+                width: parent.width
+                spacing: 4
+                visible: root.game.currentQuestionData
+                         && root.game.currentQuestionData.hints
+                         && root.game.currentQuestionData.hints.length > 0
+
+                Repeater {
+                    model: root.game.currentQuestionData
+                           ? (root.game.currentQuestionData.hints || []) : []
+                    Text {
+                        required property string modelData
+                        width: parent.width
+                        text: "\u25B8 " + modelData
+                        color: "#aaaaaa"
+                        font { pixelSize: 10; family: "monospace" }
+                        wrapMode: Text.WordWrap
+                    }
+                }
+            }
+
+            // Scores
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "S1: " + root.game.player1Score
+                      + "  S2: " + root.game.player2Score
+                color: "#cccccc"
+                font { pixelSize: 12; family: "monospace" }
+            }
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 160; height: 44; radius: 6
+                color: "#2a4a8a"
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Weiter"
+                    color: "#ffffff"
+                    font { pixelSize: 16; bold: true; family: "monospace" }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.game.nextStep()
+                }
             }
         }
     }
