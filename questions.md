@@ -77,6 +77,15 @@
 > Hint: Hayao Miyazakis Film gewann 2003 den Oscar für den besten Animationsfilm — als erster (und lange einziger) Anime überhaupt. In Japan war er bis 2020 der erfolgreichste Film aller Zeiten.
 > Hint: Das Badehaus, in dem Chihiro arbeitet, ist inspiriert von realen japanischen Onsen und dem Edo-Tokyo Open Air Architectural Museum. Miyazaki besuchte das Museum regelmäßig zur Recherche.
 
+### "Volle Energie, ..."
+- [ ] ...und fertig ist das Mittagessen
+- [x] ...und fertig ist die Ramrod-Infanterie
+- [ ] ...und alle Birnen leuchten
+- [ ] ...und fertig ist die Symphonie
+> Hint: Ramrod ist ein riesiger Kampfroboter in Cowboy-Gestalt, gesteuert von den vier Starsheriffs. Der Kampfruf ertönt jedes Mal, wenn Ramrod sich aus dem Raumschiff transformiert.
+> Hint: Die Serie basiert auf dem japanischen Anime "Sei Jūshi Bismarck" (1984), wurde aber von World Events Productions massiv umgeschrieben — neue Episoden, geänderte Handlung, umbenannte Charaktere. In Japan war Fireball die Hauptfigur, nicht Saber Rider.
+> Hint: In Deutschland lief die Serie 1989 auf Tele 5 und wurde zum Kult. Die Outrider "starben" im Original, in der westlichen Version "sprangen" sie zurück in ihre Dimension — Gewalt war in US-Cartoons tabu.
+
 ---
 
 ## Du kommst hier nicht rein! Oder doch?
