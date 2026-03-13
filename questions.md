@@ -279,14 +279,14 @@
 > Sponsor: Gesponsert von Shazam — Hilft leider nicht bei live Gesang!
 > Type: singing
 
-### Macarena
-> Artist: Los del Rio
+### The Real Slim Shady
+> Artist: Eminem
 > Timer: 200
 
 ### Wannabe
 > Artist: Spice Girls
 > Timer: 200
 
-### My Name Is
-> Artist: Eminem
+### My Heart Will Go On
+> Artist: Celine Dion
 > Timer: 200
