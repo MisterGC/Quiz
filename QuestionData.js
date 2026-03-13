@@ -25,19 +25,6 @@ var rounds = [
                           "The Secret of Monkey Island", "Full Throttle"],
                 correct: 2,
                 roast: "Du kämpfst wie ein Bauer."
-            },
-            {
-                text: "Wie heißt die erste Episode von 'Doom' (1993)?",
-                answers: ["The Shores of Hell", "Inferno",
-                          "Knee-Deep in the Dead", "Thy Flesh Consumed"],
-                correct: 2,
-                roast: "Knietief in falschen Antworten, sozusagen."
-            },
-            {
-                text: "Welches Artillerie-Spiel mit Viechern erschien 1995 und wurde zum LAN-Party-Klassiker?",
-                answers: ["Angry Birds", "Worms", "Liero", "Scorched Earth"],
-                correct: 1,
-                roast: "Das sind keine Vögel, Genie. Das sind Wirbellose."
             }
         ]
     },

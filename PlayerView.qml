@@ -252,7 +252,7 @@ Item {
 
                     Rectangle {
                         width: parent.width
-                        height: (parent.height - parent.spacing * 2) / 3
+                        height: (parent.height - parent.spacing * (root.game.insultChoices.length - 1)) / root.game.insultChoices.length
                         radius: 6
                         color: root.answerColors[index % root.answerColors.length]
 

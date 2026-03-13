@@ -257,6 +257,21 @@ Item {
     }
 
     Music {
+        id: blitzMusic
+        source: "sound/blitz_loop.mp3"
+        loop: true
+        volume: root.game.currentMode === "taste"
+                && (root.game.phase === "blitzPair"
+                    || root.game.phase === "blitzReveal") ? 1.0 : 0.0
+        onVolumeChanged: if (volume === 0 && root.game.currentMode !== "taste") stop()
+        Behavior on volume { NumberAnimation { duration: 1500 } }
+
+        property bool shouldPlay: root.game.currentMode === "taste"
+                                  && root.game.phase === "blitzPair"
+        onShouldPlayChanged: if (shouldPlay) play()
+    }
+
+    Music {
         id: swordFightMusic
         source: "sound/sword_fighting.mp3"
         loop: true

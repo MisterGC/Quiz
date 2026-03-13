@@ -36,20 +36,6 @@
 > Hint: Duke Nukem 3D (1996, 3D Realms) war berüchtigt für geklaute Film-Zitate: "Hail to the king, baby!" aus Army of Darkness, der Bubblegum-Spruch aus "They Live", und "I'll rip your head off and shit down your neck" aus Full Metal Jacket.
 > Hint: Gesprochen wurde Duke von Jon St. John, dessen Stimme so ikonisch wurde, dass er bis heute auf Conventions "Hail to the king, baby!" zum Besten gibt. Fun Fact: Die Sprachaufnahmen für DN3D dauerten nur einen einzigen Tag.
 
-### Wie heißt die erste Episode von 'Doom' (1993)?
-- [ ] The Shores of Hell
-- [ ] Inferno
-- [x] Knee-Deep in the Dead
-- [ ] Thy Flesh Consumed
-> Knietief in falschen Antworten, sozusagen.
-
-### Welches Artillerie-Spiel mit Viechern erschien 1995 und wurde zum LAN-Party-Klassiker?
-- [ ] Angry Birds
-- [x] Worms
-- [ ] Liero
-- [ ] Scorched Earth
-> Das sind keine Vögel, Genie. Das sind Wirbellose.
-
 ### Korben und Leeloo sitzen in einem Taxi und geraten in eine Polizeikontrolle — was sagt Leeloo?
 - [ ] Globalpass
 - [x] Multipass

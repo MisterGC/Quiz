@@ -1154,6 +1154,7 @@ Item {
                 border.color: codeInput.activeFocus ? "#ffcc00" : "#555577"
                 border.width: 1
                 visible: !network.connected
+                onVisibleChanged: if (!visible) codeInput.focus = false
 
                 TextInput {
                     id: codeInput
