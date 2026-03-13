@@ -266,6 +266,26 @@
 - Mit Känguru boxen
 - Mit Pinguin tanzen
 
+### Wasserball im Piranha-Becken — oder — Basketball im Gorillakäfig
+- Wasserball im Piranha-Becken
+- Basketball im Gorillakäfig
+
+### Chili in der Tagescreme — oder — Essig im Deo
+- Chili in der Tagescreme
+- Essig im Deo
+
+### Im Kino Augen verbunden — oder — Auf dem Konzert gehörverstopft
+- Im Kino Augen verbunden
+- Auf dem Konzert gehörverstopft
+
+### In der Badehose zum Bewerbungsgespräch — oder — Im Müllsack in die Oper
+- In der Badehose zum Bewerbungsgespräch
+- Im Müllsack in die Oper
+
+### Sardinen-Smoothie zum Nachtisch — oder — Senf-Latte zum Frühstück
+- Sardinen-Smoothie zum Nachtisch
+- Senf-Latte zum Frühstück
+
 ---
 
 ## Verstimmte Gabel
