@@ -150,7 +150,7 @@ Item {
                     spacing: 4
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "SPIELER 1"
+                        text: "BASTI"
                         color: "#aaaacc"
                         font { pixelSize: 12; family: "monospace" }
                     }
@@ -166,7 +166,7 @@ Item {
                     spacing: 4
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "SPIELER 2"
+                        text: "CROWD"
                         color: "#ccaaaa"
                         font { pixelSize: 12; family: "monospace" }
                     }
@@ -195,7 +195,7 @@ Item {
                     spacing: 2
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "SPIELER 1"
+                        text: "BASTI"
                         color: "#aaaacc"
                         font { pixelSize: 10; family: "monospace" }
                     }
@@ -215,7 +215,7 @@ Item {
                     spacing: 2
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "SPIELER 2"
+                        text: "CROWD"
                         color: "#ccaaaa"
                         font { pixelSize: 10; family: "monospace" }
                     }
