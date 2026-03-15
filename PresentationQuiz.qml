@@ -101,7 +101,7 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: 50
         y: parent.height * 0.35
-        spacing: 14
+        spacing: 18
         opacity: (root.game.answersRevealed || root.isReveal) ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 300 } }
 
@@ -110,7 +110,8 @@ Item {
 
             Item {
                 width: answerList.width
-                height: answerLetterText.height + 8
+                height: Math.max(answerLetterText.implicitHeight,
+                                 answerText.implicitHeight) + 12
 
                 readonly property bool isCorrect: root.qData
                                                   && index === root.qData.correct
@@ -134,12 +135,13 @@ Item {
                             return root.colWrong;
                         return "#444444";
                     }
-                    font { pixelSize: 24; bold: true; family: "monospace" }
+                    font { pixelSize: 30; bold: true; family: "monospace" }
                     Behavior on color { ColorAnimation { duration: 300 } }
                 }
 
                 // Answer text
                 Text {
+                    id: answerText
                     anchors.left: answerLetterText.right
                     anchors.leftMargin: 14
                     anchors.right: choiceTags.left
@@ -154,7 +156,7 @@ Item {
                         return "#555555";
                     }
                     font {
-                        pixelSize: 20
+                        pixelSize: 26
                         bold: root.isReveal && parent.isCorrect
                         family: "monospace"
                         italic: root.isInsult

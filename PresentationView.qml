@@ -261,13 +261,13 @@ Item {
         source: "sound/blitz_loop.mp3"
         loop: true
         volume: root.game.currentMode === "taste"
-                && (root.game.phase === "blitzPair"
-                    || root.game.phase === "blitzReveal") ? 1.0 : 0.0
+                && root.game.phase.startsWith("blitz") ? 1.0 : 0.0
         onVolumeChanged: if (volume === 0 && root.game.currentMode !== "taste") stop()
         Behavior on volume { NumberAnimation { duration: 1500 } }
 
         property bool shouldPlay: root.game.currentMode === "taste"
                                   && root.game.phase === "blitzPair"
+                                  && root.game.currentQuestion === 0
         onShouldPlayChanged: if (shouldPlay) play()
     }
 
@@ -537,7 +537,7 @@ Item {
                     spacing: 4
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "SPIELER 1"
+                        text: "BASTI"
                         color: "#aaaacc"
                         font { pixelSize: 14; family: "monospace" }
                     }
@@ -553,7 +553,7 @@ Item {
                     spacing: 4
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "SPIELER 2"
+                        text: "CROWD"
                         color: "#ccaaaa"
                         font { pixelSize: 14; family: "monospace" }
                     }
@@ -677,8 +677,8 @@ Item {
 
         property int totalScore: root.game.player1Score + root.game.player2Score
         property string winner: {
-            if (root.game.player1Score > root.game.player2Score) return "SPIELER 1 GEWINNT!";
-            if (root.game.player2Score > root.game.player1Score) return "SPIELER 2 GEWINNT!";
+            if (root.game.player1Score > root.game.player2Score) return "BASTI GEWINNT!";
+            if (root.game.player2Score > root.game.player1Score) return "CROWD GEWINNT!";
             return "UNENTSCHIEDEN!";
         }
         property string rating: {
@@ -714,7 +714,7 @@ Item {
                     spacing: 4
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "SPIELER 1"
+                        text: "BASTI"
                         color: "#aaaacc"
                         font { pixelSize: 14; family: "monospace" }
                     }
@@ -730,7 +730,7 @@ Item {
                     spacing: 4
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "SPIELER 2"
+                        text: "CROWD"
                         color: "#ccaaaa"
                         font { pixelSize: 14; family: "monospace" }
                     }

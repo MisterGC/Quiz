@@ -223,7 +223,8 @@ Item {
             chosenInsultIdx: chosenInsultIdx,
             duelWinner: duelWinner,
             connectedRoles: connectedRoles,
-            bonusAwarded: bonusAwarded
+            bonusAwarded: bonusAwarded,
+            currentDuelData: currentDuelData
         };
     }
 
@@ -260,14 +261,7 @@ Item {
         if (s.duelWinner !== undefined) duelWinner = s.duelWinner;
         if (s.connectedRoles !== undefined) connectedRoles = s.connectedRoles;
         if (s.bonusAwarded !== undefined) bonusAwarded = s.bonusAwarded;
-        // Recompute currentDuelData from synced indices
-        if (chosenInsultIdx >= 0 && currentRoundData) {
-            var qs = currentRoundData.questions;
-            currentDuelData = (chosenInsultIdx < qs.length)
-                              ? qs[chosenInsultIdx] : null;
-        } else {
-            currentDuelData = null;
-        }
+        if (s.currentDuelData !== undefined) currentDuelData = s.currentDuelData;
         networkReady = true;
     }
 
@@ -685,8 +679,22 @@ Item {
         usedInsults = used;
 
         var qs = currentRoundData ? currentRoundData.questions : [];
-        currentDuelData = (choiceIdx >= 0 && choiceIdx < qs.length)
-                          ? qs[choiceIdx] : null;
+        var origQ = (choiceIdx >= 0 && choiceIdx < qs.length) ? qs[choiceIdx] : null;
+        if (origQ) {
+            var idx = [0, 1, 2, 3];
+            for (var i = idx.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+            }
+            currentDuelData = {
+                text: origQ.text,
+                answers: idx.map(function(k) { return origQ.answers[k]; }),
+                correct: idx.indexOf(origQ.correct),
+                roast: origQ.roast
+            };
+        } else {
+            currentDuelData = null;
+        }
         currentQuestion = choiceIdx;
 
         timerValue = timerMax;

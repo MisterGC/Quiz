@@ -102,14 +102,20 @@ https://<hostname>:8000/webdojo?src=https://<hostname>:8090/Game.qml#role=basti&
 https://<hostname>:8000/webdojo?src=https://<hostname>:8090/Game.qml#role=dacrowd&signaling=wss://<hostname>:8090/peerjs
 ```
 
-Replace `<hostname>` with the machine's LAN hostname or IP address.
+Replace `<hostname>` with the machine's LAN hostname (e.g. `mistergc-air-1.local`).
+mDNS/Bonjour (`.local`) resolves reliably between Apple devices — no IP needed.
+Fallback if mDNS doesn't work: `ipconfig getifaddr en0` and use the IP directly.
 
 **Join flow:** The host shows a join code on screen. Clients enter this code to
 connect (or pass `#session=XYZ` in the URL to join automatically).
 
 **Self-signed certificates:** On first access per device, visit both
 `https://<hostname>:8000` and `https://<hostname>:8090` directly in the browser
-and accept the certificate warning. After that the WebDojo role URLs will work.
+and accept the certificate warning. On iPads: tap "Erweitert" → "Diese Webseite
+besuchen". This persists as long as the certificate stays the same.
+
+**Party hardware setup & Packliste:** See [doc/party_setup.md](doc/party_setup.md)
+for the full checklist including test procedure, Packliste, and quick-setup guide.
 
 ## TODO
 

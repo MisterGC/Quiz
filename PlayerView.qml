@@ -39,7 +39,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.leftMargin: 8
-                text: "SPIELER " + (root.playerIndex + 1)
+                text: root.playerIndex === 0 ? "BASTI" : "CROWD"
                 color: root.gold
                 font { pixelSize: 12; bold: true; family: "monospace" }
             }

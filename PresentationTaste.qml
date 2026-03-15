@@ -110,7 +110,7 @@ Item {
                                      && root.game.player1Answer === 0
                             Text {
                                 anchors.centerIn: parent
-                                text: "S1"; color: "#fff"
+                                text: "B"; color: "#fff"
                                 font { pixelSize: 10; bold: true; family: "monospace" }
                             }
                         }
@@ -121,7 +121,7 @@ Item {
                                      && root.game.player2Answer === 0
                             Text {
                                 anchors.centerIn: parent
-                                text: "S2"; color: "#fff"
+                                text: "C"; color: "#fff"
                                 font { pixelSize: 10; bold: true; family: "monospace" }
                             }
                         }
@@ -183,7 +183,7 @@ Item {
                                      && root.game.player1Answer === 1
                             Text {
                                 anchors.centerIn: parent
-                                text: "S1"; color: "#fff"
+                                text: "B"; color: "#fff"
                                 font { pixelSize: 10; bold: true; family: "monospace" }
                             }
                         }
@@ -194,7 +194,7 @@ Item {
                                      && root.game.player2Answer === 1
                             Text {
                                 anchors.centerIn: parent
-                                text: "S2"; color: "#fff"
+                                text: "C"; color: "#fff"
                                 font { pixelSize: 10; bold: true; family: "monospace" }
                             }
                         }
@@ -217,7 +217,7 @@ Item {
                 if (r.length === 0) return "";
                 var last = r[r.length - 1];
                 if (last.bastiAnswer < 0 || last.crowdAnswer < 0)
-                    return "ZU LANGSAM";
+                    return "OHHHH";
                 return last.matched ? "JUBEL!" : "OHHHH";
             }
             color: {
@@ -225,28 +225,29 @@ Item {
                 if (r.length === 0) return "#ffffff";
                 var last = r[r.length - 1];
                 if (last.bastiAnswer < 0 || last.crowdAnswer < 0)
-                    return root.colTimeout;
+                    return root.colWrong;
                 return last.matched ? root.colCorrect : root.colWrong;
             }
-            font { pixelSize: 80; bold: true; family: "monospace" }
+            font { pixelSize: 200; bold: true; family: "monospace" }
 
-            scale: revealScale.running ? 1.0 : 0.5
+            scale: revealScale.running ? 1.0 : 1.0
             opacity: root.game.phase === "blitzReveal" ? 1 : 0
         }
 
         SequentialAnimation {
             id: revealScale
             running: root.game.phase === "blitzReveal"
-            loops: 1
+            loops: Animation.Infinite
 
             NumberAnimation {
                 target: revealText; property: "scale"
-                from: 0.3; to: 1.2; duration: 200
-                easing.type: Easing.OutBack
+                from: 1.0; to: 1.15; duration: 400
+                easing.type: Easing.InOutSine
             }
             NumberAnimation {
                 target: revealText; property: "scale"
-                from: 1.2; to: 1.0; duration: 150
+                from: 1.15; to: 1.0; duration: 400
+                easing.type: Easing.InOutSine
             }
         }
     }
@@ -348,7 +349,7 @@ Item {
                                 spacing: 20
 
                                 Text {
-                                    text: "S1: " + (modelData.bastiAnswer >= 0
+                                    text: "B: " + (modelData.bastiAnswer >= 0
                                           && modelData.bastiAnswer < modelData.answers.length
                                           ? modelData.answers[modelData.bastiAnswer]
                                           : "\u2014")
@@ -357,7 +358,7 @@ Item {
                                 }
 
                                 Text {
-                                    text: "S2: " + (modelData.crowdAnswer >= 0
+                                    text: "C: " + (modelData.crowdAnswer >= 0
                                           && modelData.crowdAnswer < modelData.answers.length
                                           ? modelData.answers[modelData.crowdAnswer]
                                           : "\u2014")
@@ -371,7 +372,7 @@ Item {
                                 text: {
                                     if (modelData.bastiAnswer < 0
                                         || modelData.crowdAnswer < 0)
-                                        return "\u2717 ZU LANGSAM";
+                                        return "\u2717 OHHHH";
                                     return modelData.matched
                                            ? "\u2713 MATCH" : "\u2717 KEIN MATCH";
                                 }
@@ -424,7 +425,7 @@ Item {
                 spacing: 2
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "SPIELER 1"
+                    text: "BASTI"
                     color: "#aaaacc"
                     font { pixelSize: 10; family: "monospace" }
                 }
@@ -452,7 +453,7 @@ Item {
                 spacing: 2
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "SPIELER 2"
+                    text: "CROWD"
                     color: "#ccaaaa"
                     font { pixelSize: 10; family: "monospace" }
                 }
