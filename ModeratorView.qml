@@ -228,8 +228,8 @@ Item {
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "S1: " + root.game.player1Score
-                          + "  S2: " + root.game.player2Score
+                    text: "B: " + root.game.player1Score
+                          + "  C: " + root.game.player2Score
                     color: root.gold
                     font { pixelSize: 14; bold: true; family: "monospace" }
                 }
@@ -300,8 +300,8 @@ Item {
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "S1: " + root.game.player1Score
-                          + "  S2: " + root.game.player2Score
+                    text: "B: " + root.game.player1Score
+                          + "  C: " + root.game.player2Score
                     color: root.gold
                     font { pixelSize: 14; bold: true; family: "monospace" }
                 }
@@ -369,23 +369,29 @@ Item {
                     color: "#cccccc"
                     font { pixelSize: 14; family: "monospace" }
                 }
+            }
 
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: 160; height: 44; radius: 6
-                    color: "#8a2a3a"
+            // --- Neustart button (always visible except title phase) ---
+            Rectangle {
+                anchors {
+                    bottom: parent.bottom
+                    horizontalCenter: parent.horizontalCenter
+                    bottomMargin: 12
+                }
+                width: 130; height: 34; radius: 6
+                color: "#8a2a3a"
+                visible: root.game.phase !== "title"
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: "Neustart"
-                        color: "#ffffff"
-                        font { pixelSize: 16; bold: true; family: "monospace" }
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.game.restartGame()
-                    }
+                Text {
+                    anchors.centerIn: parent
+                    text: "Neustart"
+                    color: "#ffffff"
+                    font { pixelSize: 13; bold: true; family: "monospace" }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.game.restartGame()
                 }
             }
         }
