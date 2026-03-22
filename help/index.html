@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spielanleitung — You Don't Know Rämpf</title>
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --card: #141414;
+        --border: #2a2a2a;
+        --text: #e0e0e0;
+        --dim: #888;
+        --accent: #f5c842;
+        --accent-dim: #c49a20;
+        --code-bg: #1a1a1a;
+        --shadow: rgba(245, 200, 66, 0.15);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Courier New", Courier, monospace;
+        line-height: 1.6;
+        min-height: 100vh;
+        padding: 2rem 1rem 4rem;
+      }
+
+      .container {
+        max-width: 740px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        color: var(--accent);
+        font-size: 1.6rem;
+        text-align: center;
+        text-shadow: 0 0 12px var(--shadow);
+        margin-bottom: 0.25rem;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: var(--dim);
+        font-size: 0.85rem;
+        margin-bottom: 2.5rem;
+      }
+
+      h2 {
+        color: var(--accent);
+        font-size: 1.1rem;
+        margin-top: 2rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.3rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      p {
+        margin-bottom: 0.75rem;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .step-num {
+        display: inline-block;
+        background: var(--accent);
+        color: #000;
+        font-weight: bold;
+        width: 1.6rem;
+        height: 1.6rem;
+        line-height: 1.6rem;
+        text-align: center;
+        border-radius: 3px;
+        margin-right: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      .step-title {
+        font-weight: bold;
+        font-size: 1rem;
+      }
+
+      .step-desc {
+        margin-top: 0.5rem;
+        color: var(--dim);
+        font-size: 0.9rem;
+      }
+
+      .role-tag {
+        display: inline-block;
+        background: var(--accent-dim);
+        color: #000;
+        font-weight: bold;
+        font-size: 0.8rem;
+        padding: 0.1rem 0.4rem;
+        border-radius: 3px;
+      }
+
+      code {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        padding: 0.15rem 0.4rem;
+        font-size: 0.88rem;
+        color: var(--accent);
+        word-break: break-all;
+      }
+
+      .url-block {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 0.6rem 0.8rem;
+        margin: 0.5rem 0;
+        font-size: 0.82rem;
+        color: var(--accent);
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .url-block .label {
+        color: var(--dim);
+        display: block;
+        font-size: 0.75rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .layout-diagram {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1rem;
+        font-size: 0.78rem;
+        line-height: 1.4;
+        overflow-x: auto;
+        white-space: pre;
+        margin: 0.75rem 0;
+        color: var(--dim);
+      }
+
+      .layout-diagram em {
+        color: var(--accent);
+        font-style: normal;
+      }
+
+      .hint {
+        border-left: 3px solid var(--accent-dim);
+        padding: 0.5rem 0.75rem;
+        margin: 1rem 0;
+        color: var(--dim);
+        font-size: 0.85rem;
+      }
+
+      .hint strong {
+        color: var(--text);
+      }
+
+      ul {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0.75rem;
+      }
+
+      ul li::before {
+        content: ">";
+        color: var(--accent);
+        font-weight: bold;
+        margin-right: 0.5rem;
+      }
+
+      ul li {
+        margin-bottom: 0.35rem;
+        font-size: 0.9rem;
+      }
+
+      .footer {
+        text-align: center;
+        color: var(--dim);
+        font-size: 0.75rem;
+        margin-top: 3rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>SPIELANLEITUNG</h1>
+      <p class="subtitle">You Don't Know Rämpf &mdash; Netzwerk-Modus</p>
+
+      <h2>Was wird gebraucht?</h2>
+      <ul>
+        <li>1 Laptop/PC &mdash; Präsentation (grosser Bildschirm / Beamer)</li>
+        <li>1 Tablet/Handy &mdash; Moderator-Steuerung</li>
+        <li>2 Tablets/Handys &mdash; je eins pro Spieler</li>
+      </ul>
+
+      <div class="layout-diagram">+---------------------------+-----------------+
+|                           | <em>  MODERATOR  </em>  |
+|    <em>  PRÄSENTATION  </em>       |  Steuerung,     |
+|    (Beamer / grosser      |  richtige       |
+|     Bildschirm)           |  Antwort        |
+|                           +-----------------+
+|    Titel, Fragen,         | <em>SPIELER  SPIELER</em>|
+|    Punkte, Animationen    |  <em>  1        2  </em> |
++---------------------------+-----------------+</div>
+
+      <h2>Spiel starten (Schritt für Schritt)</h2>
+
+      <div class="card">
+        <span class="step-num">1</span>
+        <span class="step-title">Host starten</span>
+        <span class="role-tag">presentation</span>
+        <p class="step-desc">
+          Öffne die Spiel-URL mit dem Parameter <code>#role=presentation</code>
+          auf dem Laptop/PC, der am Beamer hängt. Das Spiel startet als Host und
+          zeigt oben rechts einen <strong>Join-Code</strong> an.
+        </p>
+        <div class="url-block">
+          <span class="label">Beispiel:</span>
+          https://&lt;deine-url&gt;/Game.qml#role=presentation
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="step-num">2</span>
+        <span class="step-title">Moderator verbinden</span>
+        <span class="role-tag">mod</span>
+        <p class="step-desc">
+          Öffne die URL mit <code>#role=mod</code> auf dem Moderator-Tablet.
+          Du kannst den Code entweder direkt in der URL mitgeben oder auf dem
+          Join-Screen eintippen.
+        </p>
+        <div class="url-block">
+          <span class="label">Mit Code in der URL:</span>
+          ...#role=mod&amp;session=XXXX
+        </div>
+        <div class="url-block">
+          <span class="label">Oder: Code manuell eingeben auf dem Join-Screen</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="step-num">3</span>
+        <span class="step-title">Spieler 1 verbinden</span>
+        <span class="role-tag">basti</span>
+        <p class="step-desc">
+          Spieler 1 öffnet die URL mit <code>#role=basti</code> und gibt
+          denselben Join-Code ein.
+        </p>
+        <div class="url-block">
+          <span class="label">Mit Code in der URL:</span>
+          ...#role=basti&amp;session=XXXX
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="step-num">4</span>
+        <span class="step-title">Spieler 2 verbinden</span>
+        <span class="role-tag">dacrowd</span>
+        <p class="step-desc">
+          Spieler 2 öffnet die URL mit <code>#role=dacrowd</code> und gibt
+          denselben Join-Code ein.
+        </p>
+        <div class="url-block">
+          <span class="label">Mit Code in der URL:</span>
+          ...#role=dacrowd&amp;session=XXXX
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="step-num">5</span>
+        <span class="step-title">Losspielen!</span>
+        <p class="step-desc">
+          Sobald alle verbunden sind, steuert der Moderator das Spiel:
+          Runde starten, Antwort aufdecken, weiter. Die Spieler antworten
+          über ihre Buzzer-Buttons auf dem eigenen Gerät.
+        </p>
+      </div>
+
+      <h2>Verbindung verloren?</h2>
+      <p>
+        Kein Problem &mdash; das Spiel versucht automatisch alle 3 Sekunden
+        sich neu zu verbinden. Nach dem Reconnect wird die Rolle erneut
+        registriert und der aktuelle Spielstand synchronisiert.
+      </p>
+
+      <h2>Standalone-Modus</h2>
+      <div class="hint">
+        <strong>Tipp:</strong> Ohne <code>#role=...</code> Parameter startet
+        das Spiel im Standalone-Modus &mdash; alle Views (Präsentation,
+        Moderator, Spieler) werden nebeneinander in einem einzigen Fenster
+        angezeigt. Praktisch zum Testen oder wenn nur ein Bildschirm
+        verfügbar ist.
+      </div>
+
+      <div class="footer">
+        You Don't Know Rämpf &mdash; Eine Hommage an You Don't Know Jack
+      </div>
+    </div>
+  </body>
+</html>
