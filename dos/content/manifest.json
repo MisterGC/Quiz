@@ -1,0 +1,165 @@
+{
+  "messages": {
+    "helpLines": [
+      "Verfuegbare Befehle:",
+      "HELP         Zeigt diese Hilfe",
+      "CLS          Loescht den Bildschirm",
+      "DATE         Zeigt aktuelles Datum",
+      "TIME         Zeigt aktuelle Uhrzeit",
+      "VER          Zeigt DOS-Version",
+      "DIR          Listet Dateien im aktuellen Ordner auf",
+      "CD <ORDNER>  Wechselt Verzeichnis",
+      "CD ..        Geht ein Verzeichnis hoch",
+      "TYPE <DATEI> Zeigt Dateiinhalt aus /content",
+      "EDIT <DATEI> Oeffnet Datei im MS-DOS Editor",
+      "EMSMANAGER   Initialisiert den Expanded Memory Manager",
+      "REBOOT       Simuliert Neustart mit POST/BIOS Checks",
+      "ECHO <TEXT>  Gibt Text aus",
+      "EXIT         Schliesst die Session (simuliert)"
+    ],
+    "dateTemplate": "Aktuelles Datum: {date}",
+    "timeTemplate": "Aktuelle Zeit: {time}",
+    "versionLine": "MS-DOS Version 6.22 (Retro-Simulation)",
+    "dirHeaderTemplate": " Verzeichnis von {path}",
+    "currentDirMarker": ".",
+    "parentDirMarker": "..",
+    "pathNotFound": "Pfad nicht gefunden",
+    "syntaxError": "Syntaxfehler",
+    "fileNotFound": "Datei nicht gefunden",
+    "fileReadError": "Datei konnte nicht gelesen werden",
+    "sessionEnded": "Session beendet. Druecke F5 fuer Neustart.",
+    "invalidCommand": "Ungueltiger Befehl oder Dateiname",
+    "programNotRunnableTemplate": "Programm {name} kann in dieser Simulation nicht ausgefuehrt werden.",
+    "autocompleteUnavailable": "Auto-Complete nicht verfuegbar",
+    "bootVersionLine": "Microsoft(R) MS-DOS(R) Version 6.22",
+    "bootCopyrightLine": "(C)Copyright Microsoft Corp 1981-1994.",
+    "bootStartTemplate": "Startzeit: {date} {time}",
+    "bootHelpHint": "Tippe HELP fuer verfuegbare Befehle.",
+    "manifestLoadError": "Fehler: content/manifest.json konnte nicht geladen werden.",
+    "manifestHint": "Lege die komplette Ordner-/Dateistruktur und Befehle in dieser Config-Datei fest.",
+    "editorTitleTemplate": "MS-DOS Editor - {file}",
+    "editorHintLine": "Ctrl+S Speichern  Esc Beenden  F10 Speichern+Beenden",
+    "editorSavedTemplate": "{file} gespeichert."
+  },
+  "commands": {
+    "HELP": { "action": "help" },
+    "CLS": { "action": "clear" },
+    "DATE": { "action": "date" },
+    "TIME": { "action": "time" },
+    "VER": { "action": "version" },
+    "DIR": { "action": "dir" },
+    "CD": { "action": "cd" },
+    "TYPE": { "action": "type" },
+    "EDIT": { "action": "edit" },
+    "REBOOT": { "action": "reboot" },
+    "ECHO": { "action": "echo" },
+    "EXIT": { "action": "exit" }
+  },
+  "programs": {
+    "EMSMANAGER": {
+      "output": [
+        "MICROSOFT Expanded Memory Manager 386   Version 4.00",
+        "(C) Copyright MICROSOFT Corporation 1988",
+        "Size of expanded memory pool adjusted.",
+        "Page Frame Base Address adjusted.",
+        "EMM386 Installed.",
+        "",
+        "            Extended memory allocated:      2528 KB",
+        "            System memory allocated:         384 KB",
+        "                                         ----------",
+        "            Expanded memory available:      2912 KB",
+        "            Page frame base address:        C8000 H",
+        "HIMEM.SYS not loaded. Additonal Extended memory not available.",
+        "Add DEVICE=C:\\DOS\\HIMEM.SYS to CONFIG.SYS to enable."
+
+      ]
+    }
+  },
+  "wingCommanderStartup": [
+    { "text": "MEMCHK: Conventional memory ............ OK", "waitMs": 1000 },
+    { "text": "MEMCHK: XMS driver (HIMEM.SYS) ......... OK", "waitMs": 1000 },
+    { "text": "MEMCHK: EMS page frame (EMM386) ........ OK", "waitMs": 1000 },
+    { "text": "DRVCHK: ORIGIN.PAK ..................... FOUND", "waitMs": 1000 },
+    { "text": "IOCHK : Sound/Joystick interface ....... READY", "waitMs": 1000 },
+    { "text": "SYSTEM: All checks passed. Starting WC.EXE", "waitMs": 1000, "warn": true }
+  ],
+  "rebootSequence": [
+    { "text": "Rebooting...", "waitMs": 320 },
+    { "text": "", "waitMs": 120 },
+    { "text": "IBM Personal Computer AT", "waitMs": 260 },
+    { "text": "BIOS ROM Version 01.10.00", "waitMs": 260 },
+    { "text": "POST: Base memory test ................. 640K OK", "waitMs": 320 },
+    { "text": "POST: Keyboard controller ............... OK", "waitMs": 220 },
+    { "text": "POST: DMA/Timer channels ............... OK", "waitMs": 220 },
+    { "text": "BIOS: Fixed Disk 0 ..................... OK", "waitMs": 260 },
+    { "text": "BIOS: Boot device C: selected", "waitMs": 340 }
+  ],
+  "executableExtensions": [".EXE"],
+  "filesystem": {
+    "directories": {
+      "DOS": {
+        "directories": {},
+        "files": [
+          {
+            "name": "CONFIG.SYS",
+            "size": 512,
+            "content": "DEVICE=C:\\DOS\\EMM386.EXE RAM\nDOS=HIGH,UMB\nFILES=30\nBUFFERS=20\nLASTDRIVE=Z\nSHELL=C:\\DOS\\COMMAND.COM C:\\DOS\\ /P"
+          },
+          { "name": "AUTOEXEC.BAT", "size": 768 },
+          { "name": "COMMAND.COM", "size": 54645 },
+          { "name": "IO.SYS", "size": 40466 },
+          { "name": "MSDOS.SYS", "size": 38138 },
+          { "name": "HIMEM.SYS", "size": 11763 },
+          { "name": "EMM386.EXE", "size": 46877 },
+          { "name": "ANSI.SYS", "size": 9360 },
+          { "name": "COUNTRY.SYS", "size": 27068 },
+          { "name": "KEYB.COM", "size": 15080 },
+          { "name": "KEYBOARD.SYS", "size": 34434 },
+          { "name": "EDIT.COM", "size": 41352 },
+          { "name": "FORMAT.COM", "size": 23000 },
+          { "name": "FDISK.EXE", "size": 54424 },
+          { "name": "SYS.COM", "size": 9528 },
+          { "name": "ATTRIB.EXE", "size": 11264 },
+          { "name": "CHKDSK.EXE", "size": 18432 },
+          { "name": "MEM.EXE", "size": 17572 },
+          { "name": "XCOPY.EXE", "size": 31232 },
+          { "name": "SMARTDRV.EXE", "size": 45472 }
+        ]
+      },
+      "GAMES": {
+        "directories": {
+          "WINGCOMMANDER": {
+            "directories": {},
+            "files": [
+              {
+                "name": "WC.EXE",
+                "type": "exe",
+                "size": 51200,
+                "onExecute": [
+                  "Not enough expanded memory (EMS) available.",
+                  "Wing Commander requires at least 4MB of EMS to run.",
+                  "Load an EMS manager and try again.",
+                  "Check emsmanager for additional help."
+                ]
+              },
+              { "name": "INSTALL.EXE", "type": "exe", "size": 32768 },
+              { "name": "ORIGIN.PAK", "size": 152576 },
+              { "name": "RESOURCE.000", "size": 98304 },
+              { "name": "RESOURCE.001", "size": 81920 },
+              { "name": "README.TXT", "size": 1024 }
+            ]
+          }
+        },
+        "files": [{ "name": "README.TXT", "size": 1024 }]
+      }
+    },
+    "files": [
+      {
+        "name": "AUTOEXEC.BAT",
+        "size": 512,
+        "content": "@ECHO OFF\nPROMPT $P$G\nPATH C:\\DOS\nSET TEMP=C:\\TEMP\nSET TMP=C:\\TEMP\nLH SMARTDRV.EXE"
+      },
+      { "name": "EMSMANAGER.EXE", "type": "exe", "size": 12288 }
+    ]
+  }
+}
